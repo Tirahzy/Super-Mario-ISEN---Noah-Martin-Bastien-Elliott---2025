@@ -1,0 +1,84 @@
+#define SDL_MAIN_HANDLED
+#include "fonction.h"
+int main(int argc, char* argv[]) {
+    SDL_Window* window = NULL;
+    SDL_Surface* screenSurface = NULL;
+    SDL_Surface* icon = NULL;
+
+    // Initialisation de SDL
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("SDL n'a pas pu s'initialiser! Erreur: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    // Création de la fenêtre
+    window = SDL_CreateWindow(
+        "Mario",
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        800,                      // Largeur
+        600,                      // Hauteur
+        SDL_WINDOW_SHOWN
+    );
+
+    if (window == NULL) {
+        printf("La fenêtre n'a pas pu être créée! Erreur: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    // Essayons plusieurs chemins pour l'icône
+    const char* paths[] = {
+        "../image/icon.bmp",
+
+
+    };
+
+    int found = 0;
+    for(int i = 0; i < 4 && !found; i++) {
+        printf("Tentative de chargement de l'icône depuis : %s\n", paths[i]);
+        icon = SDL_LoadBMP(paths[i]);
+        if (icon != NULL) {
+            printf("Icône chargée avec succès depuis : %s\n", paths[i]);
+            SDL_SetWindowIcon(window, icon);
+            SDL_FreeSurface(icon);
+            found = 1;
+        } else {
+            printf("Échec du chargement depuis %s : %s\n", paths[i], SDL_GetError());
+        }
+    }
+
+    if (!found) {
+        printf("Impossible de charger l'icône depuis aucun chemin!\n");
+    }
+
+    // Obtention de la surface de la fenêtre
+    screenSurface = SDL_GetWindowSurface(window);
+
+    // Remplissage de la surface avec du blanc
+    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 255, 255, 255));
+
+    // Mise à jour de la surface de la fenêtre
+    SDL_UpdateWindowSurface(window);
+
+    // Boucle principale
+    SDL_Event event;
+    int running = 1;
+
+    while (running) {
+        // Gestion des événements
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    running = 0;
+                    break;
+            }
+        }
+    }
+
+    // Destruction de la fenêtre et quitter SDL
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
+}
