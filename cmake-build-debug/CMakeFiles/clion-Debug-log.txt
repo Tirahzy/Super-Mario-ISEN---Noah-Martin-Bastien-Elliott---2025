@@ -1,4 +1,4 @@
-"C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S C:\Users\nonon\CLionProjects\projetMario -B C:\Users\nonon\CLionProjects\projetMario\cmake-build-debug
+"C:\Program Files\JetBrains\CLion 2024.3.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "MinGW Makefiles" -S C:\Users\marti\CLionProjects\projetMario -B C:\Users\marti\CLionProjects\projetMario\cmake-build-debug
 -- Configuring done (0.2s)
--- Generating done (0.1s)
--- Build files have been written to: C:/Users/nonon/CLionProjects/projetMario/cmake-build-debug
+-- Generating done (0.5s)
+-- Build files have been written to: C:/Users/marti/CLionProjects/projetMario/cmake-build-debug
