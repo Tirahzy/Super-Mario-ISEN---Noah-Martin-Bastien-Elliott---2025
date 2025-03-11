@@ -28,14 +28,14 @@ int affichageMenu(int argc, char* argv[]) {
     }
 
     // Chargement de l'icône
-    icon = SDL_LoadBMP("../image/icon.bmp");
+    icon = SDL_LoadBMP("projetMario/image/icon.bmp");
     if (icon) {
         SDL_SetWindowIcon(window, icon);
         SDL_FreeSurface(icon);
     }
 
     // Chargement de l'image du menu
-    menu = SDL_LoadBMP("../image/menu.bmp");
+    menu = SDL_LoadBMP("../projetMario/image/menu.bmp");
     if (!menu) {
         printf("Erreur chargement menu.bmp : %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
