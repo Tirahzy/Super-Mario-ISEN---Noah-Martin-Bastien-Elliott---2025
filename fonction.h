@@ -12,5 +12,6 @@ typedef struct {
     int h;
 } Mario;
 
+int affichageMenu(int argc, char* argv[]);
 
 #endif //FONCTION_H
