@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/ellio/Desktop/ProjetMario/fichier_elliott",
-      "program": "c:/Users/ellio/Desktop/ProjetMario/fichier_elliott/build/Debug/outDebug",
+      "cwd": "c:/Users/ellio/Documents/Junia/Cir1/Programmation/C/Projet Mario/ProjetMario/src",
+      "program": "c:/Users/ellio/Documents/Junia/Cir1/Programmation/C/Projet Mario/ProjetMario/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
