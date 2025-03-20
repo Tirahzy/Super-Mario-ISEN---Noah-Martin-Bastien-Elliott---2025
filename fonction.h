@@ -1,5 +1,6 @@
 #ifndef FONCTION_H
 #define FONCTION_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -12,6 +13,6 @@ typedef struct {
     int h;
 } Mario;
 
-int affichageMenu(int argc, char* argv[]);
 
-#endif //FONCTION_H
+
+#endif
