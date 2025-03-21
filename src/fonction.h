@@ -1,17 +1,10 @@
 #ifndef FONCTION_H
 #define FONCTION_H
 
-#include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-typedef struct
-{
-    int x;
-    int y;
-    int w;
-    int h;
-} Mario;
-
-SDL_Window *creerFenetre();
+SDL_Window* creerFenetre();
 
 #endif
