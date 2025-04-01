@@ -1,7 +1,11 @@
 #include "fonction.h"
 
-const int LONGUEUR_FENETRE = 960;
-const int LARGEUR_FENETRE = 540;
+const int LONGUEUR_FENETRE = 960; //960
+const int LARGEUR_FENETRE = 540; // 540
+const int SOL = 380;
+const float GRAVITE = 0.5f;
+const float FORCE_SAUT = -10.0f;
+const int VITESSE_DEPLACEMENT = 5;
 
 int main(int argc, char *argv[])
 {
@@ -14,14 +18,48 @@ int main(int argc, char *argv[])
     SDL_Window* fenetreJeu = creerFenetre("Mario");
     SDL_Renderer* renderer = creerRenderer(fenetreJeu);
 
-    SDL_Rect carre = {50, 380, 50, 50};
+    SDL_Rect carre = {50, SOL, 50, 50};
+    SDL_bool enSaut = SDL_FALSE;
+    float vitesseSaut = 0;
+    Touches touches = {SDL_FALSE, SDL_FALSE, SDL_FALSE};
 
     SDL_bool continuer = SDL_TRUE;
     while(continuer)
     {
-        gererEvenements(&continuer, &carre);
+        gererEvenements(&continuer, &carre, &enSaut, &vitesseSaut, &touches);
+        
+        if (touches.gauche)
+        {
+            carre.x -= VITESSE_DEPLACEMENT;
+            if(carre.x < 0) carre.x = 0;
+        }
+        if (touches.droite)
+        {
+            carre.x += VITESSE_DEPLACEMENT;
+            if(carre.x > LONGUEUR_FENETRE - carre.w) carre.x = LONGUEUR_FENETRE - carre.w;
+        }
+        
+        if (enSaut)
+        {
+            carre.y += vitesseSaut;
+            vitesseSaut += GRAVITE;
+            
+            if (carre.y >= SOL)
+            {
+                carre.y = SOL;
+                enSaut = SDL_FALSE;
+                vitesseSaut = 0;
+            }
+        }
+        else if (touches.saut)
+        {
+            enSaut = SDL_TRUE;
+            vitesseSaut = FORCE_SAUT;
+            touches.saut = SDL_FALSE;
+        }
+        
         dessinerCarre(renderer, carre);
-        SDL_Delay(16); // Petite pause pour économiser le CPU (>60 FPS)
+        SDL_Delay(16);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -29,6 +67,3 @@ int main(int argc, char *argv[])
     SDL_Quit();
     return 0;
 }
-
-// mingw32-make
-// ./Jeu.exe

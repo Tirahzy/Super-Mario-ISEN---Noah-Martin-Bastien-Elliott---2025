@@ -37,7 +37,7 @@ void dessinerCarre(SDL_Renderer* renderer, SDL_Rect carre)
     SDL_RenderPresent(renderer);
 }
 
-void gererEvenements(SDL_bool* continuer, SDL_Rect* carre)
+void gererEvenements(SDL_bool* continuer, SDL_Rect* carre, SDL_bool* enSaut, float* vitesseSaut, Touches* touches)
 {
     SDL_Event event;
     
@@ -53,19 +53,32 @@ void gererEvenements(SDL_bool* continuer, SDL_Rect* carre)
                 switch(event.key.keysym.sym)
                 {
                     case SDLK_q:
-                        carre->x -= 10;
-                        if(carre->x < 0)
-                            carre->x = 0;
+                        touches->gauche = SDL_TRUE;
                         break;
                         
                     case SDLK_d:
-                        carre->x += 10;
-                        if(carre->x > LONGUEUR_FENETRE - carre->w)
-                            carre->x = LONGUEUR_FENETRE - carre->w;
+                        touches->droite = SDL_TRUE;
+                        break;
+                        
+                    case SDLK_SPACE:
+                        touches->saut = SDL_TRUE;
                         break;
                         
                     case SDLK_ESCAPE:
                         *continuer = SDL_FALSE;
+                        break;
+                }
+                break;
+                
+            case SDL_KEYUP:
+                switch(event.key.keysym.sym)
+                {
+                    case SDLK_q:
+                        touches->gauche = SDL_FALSE;
+                        break;
+                        
+                    case SDLK_d:
+                        touches->droite = SDL_FALSE;
                         break;
                 }
                 break;
