@@ -82,53 +82,104 @@ int main(int argc, char *argv[])
         //     touches.saut = SDL_FALSE;
         // }
 
+        // if (enSaut)
+        // {
+        //     carre.y += vitesseSaut;
+        //     vitesseSaut += GRAVITE;
+
+        //     // Vérifier collision vers le bas
+        //     SDL_Rect testBas = carre;
+        //     testBas.y += 1; // Petit déplacement vers le bas pour détection
+
+        //     if (detecterCollision(testBas))
+        //     {
+        //         // Ajuster la position juste au-dessus du bloc
+        //         carre.y = ((carre.y + carre.h) / BLOC_SIZE) * BLOC_SIZE - carre.h;
+        //         enSaut = SDL_FALSE;
+        //         vitesseSaut = 0;
+        //     }
+
+        //     // Vérifier collision vers le haut
+        //     SDL_Rect testHaut = carre;
+        //     testHaut.y -= 1; // Petit déplacement vers le haut
+
+        //     if (detecterCollision(testHaut) && vitesseSaut < 0)
+        //     {
+        //         carre.y = ((carre.y / BLOC_SIZE) + 1) * BLOC_SIZE;
+        //         vitesseSaut = 0; // Annuler la vitesse ascendante
+        //     }
+        // }
+        // else
+        // {
+        //     // Vérifier si on est sur le sol
+        //     SDL_Rect testSol = carre;
+        //     testSol.y += 1; // Petit déplacement vers le bas
+
+        //     if (!detecterCollision(testSol))
+        //     {
+        //         // On n'est plus sur le sol - commencer à tomber
+        //         enSaut = SDL_TRUE;
+        //         vitesseSaut = 0;
+        //     }
+        //     else if (touches.saut)
+        //     {
+        //         // Saut seulement si on est sur le sol
+        //         enSaut = SDL_TRUE;
+        //         vitesseSaut = FORCE_SAUT;
+        //         touches.saut = SDL_FALSE;
+        //     }
+        // }
+
+        // Saut avec collision
+
         if (enSaut)
         {
             carre.y += vitesseSaut;
             vitesseSaut += GRAVITE;
-        
-            // Vérifier collision vers le bas
+
+            // Collision vers le bas
             SDL_Rect testBas = carre;
-            testBas.y += 1; // Petit déplacement vers le bas pour détection
-            
-            if (detecterCollision(testBas))
+            testBas.y += 1;
+            if (vitesseSaut > 0 && detecterCollision(testBas))
             {
-                // Ajuster la position juste au-dessus du bloc
+                // Ajustement pour coller au bloc sans le traverser
                 carre.y = ((carre.y + carre.h) / BLOC_SIZE) * BLOC_SIZE - carre.h;
                 enSaut = SDL_FALSE;
                 vitesseSaut = 0;
             }
-            
-            // Vérifier collision vers le haut
+
+            // Collision vers le haut
             SDL_Rect testHaut = carre;
-            testHaut.y -= 1; // Petit déplacement vers le haut
-            
-            if (detecterCollision(testHaut) && vitesseSaut < 0)
+            testHaut.y -= 1;
+            if (vitesseSaut < 0 && detecterCollision(testHaut))
             {
-                carre.y = ((carre.y / BLOC_SIZE) + 1) * BLOC_SIZE;
-                vitesseSaut = 0; // Annuler la vitesse ascendante
+                carre.y = ((carre.y) / BLOC_SIZE + 1) * BLOC_SIZE;
+                vitesseSaut = 0;
             }
         }
         else
         {
-            // Vérifier si on est sur le sol
+            // Tester si le joueur est dans les airs
             SDL_Rect testSol = carre;
-            testSol.y += 1; // Petit déplacement vers le bas
-            
+            testSol.y += 1;
             if (!detecterCollision(testSol))
             {
-                // On n'est plus sur le sol - commencer à tomber
                 enSaut = SDL_TRUE;
                 vitesseSaut = 0;
             }
             else if (touches.saut)
             {
-                // Saut seulement si on est sur le sol
                 enSaut = SDL_TRUE;
                 vitesseSaut = FORCE_SAUT;
                 touches.saut = SDL_FALSE;
             }
         }
+
+        // Ne pas sortir de la map
+        if (carre.x < 0)
+            carre.x = 0;
+        if (carre.x > MAP_LARGEUR * BLOC_SIZE - carre.w)
+            carre.x = MAP_LARGEUR * BLOC_SIZE - carre.w;
 
         // Mise à jour de la caméra
         cameraX = carre.x + carre.w / 2 - LONGUEUR_FENETRE / 2;
@@ -144,10 +195,10 @@ int main(int argc, char *argv[])
         dessinerMap(renderer, cameraX);
 
         // Perso
-        
-        // dessinerCarre(renderer, (SDL_Rect){carre.x - cameraX, carre.y, carre.w, carre.h});
-        SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
-        SDL_RenderCopy(renderer, persoTexture, NULL, &dst);
+
+        dessinerCarre(renderer, (SDL_Rect){carre.x - cameraX, carre.y, carre.w, carre.h});
+        // SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
+        // SDL_RenderCopy(renderer, persoTexture, NULL, &dst);
 
         SDL_RenderPresent(renderer);
 

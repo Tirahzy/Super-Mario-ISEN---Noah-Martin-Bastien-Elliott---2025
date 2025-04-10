@@ -143,16 +143,15 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX)
 
             switch (map[y][x])
             {
-            case 1:                                                 // Sol
+            case 1:
                 SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255); // marron
                 SDL_RenderFillRect(renderer, &bloc);
                 break;
-            case 2:                                                   // Plateforme
+            case 2:
                 SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); // gris
                 SDL_RenderFillRect(renderer, &bloc);
                 break;
             default:
-                // Rien à dessiner
                 break;
             }
         }
