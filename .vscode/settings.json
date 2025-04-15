@@ -58,6 +58,7 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "fonction.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "sdl.h": "c"
   }
 }

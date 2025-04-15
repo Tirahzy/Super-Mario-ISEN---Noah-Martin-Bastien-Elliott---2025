@@ -92,7 +92,7 @@ void initialiserMap()
         for (int j = 0; j < MAP_LARGEUR; j++)
             map[i][j] = 0;
 
-    // Sol principal (ligne y = 9)
+    // Sol principal (ligne y = 15)
     for (int x = 0; x < MAP_LARGEUR; x++)
         map[MAP_HAUTEUR - 3][x] = 1;
 
@@ -117,7 +117,8 @@ void initialiserMap()
         map[MAP_HAUTEUR - 10][x] = 2;
 
     // Grotte / Tunnel
-    for (int x = 60; x < 68; x++) {
+    for (int x = 60; x < 68; x++)
+    {
         map[MAP_HAUTEUR - 4][x] = 1; // sol
         map[MAP_HAUTEUR - 5][x] = 0; // vide
         map[MAP_HAUTEUR - 6][x] = 1; // plafond
@@ -125,9 +126,20 @@ void initialiserMap()
 
     // Plateforme très haute (besoin d'élan)
     for (int x = 75; x < 80; x++)
+    {
         map[MAP_HAUTEUR - 9][x] = 2;
-}
+    }
 
+    // Pièces
+    map[MAP_HAUTEUR - 7][25] = BLOC_PIECE;
+    map[MAP_HAUTEUR - 7][26] = BLOC_PIECE;
+    map[MAP_HAUTEUR - 4][15] = BLOC_PIECE;
+    
+    // Ajout de plus de pièces pour un meilleur gameplay
+    map[MAP_HAUTEUR - 5][50] = BLOC_PIECE;
+    map[MAP_HAUTEUR - 11][55] = BLOC_PIECE;
+    map[MAP_HAUTEUR - 7][70] = BLOC_PIECE;
+}
 
 void dessinerMap(SDL_Renderer *renderer, int cameraX)
 {
@@ -149,6 +161,10 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX)
                 break;
             case 2:
                 SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); // gris
+                SDL_RenderFillRect(renderer, &bloc);
+                break;
+            case BLOC_PIECE:
+                SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255); // jaune or
                 SDL_RenderFillRect(renderer, &bloc);
                 break;
             default:
@@ -193,9 +209,26 @@ SDL_bool detecterCollision(SDL_Rect joueur)
             if (x < 0 || x >= MAP_LARGEUR || y < 0 || y >= MAP_HAUTEUR)
                 continue;
 
-            if (map[y][x] != 0)
+            if (map[y][x] != 0 && map[y][x] != BLOC_PIECE)
                 return SDL_TRUE;
         }
     }
     return SDL_FALSE;
+}
+
+void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police)
+{
+    char texte[32];
+    sprintf(texte, "Score : %d", nbPieces);
+
+    SDL_Color couleur = {255, 255, 255}; // blanc
+    SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, texte, couleur);
+    SDL_Texture *textureTexte = SDL_CreateTextureFromSurface(renderer, surfaceTexte);
+
+    SDL_Rect dest = {10, 10, surfaceTexte->w, surfaceTexte->h};
+    SDL_RenderCopy(renderer, textureTexte, NULL, &dest);
+
+    // Libérer
+    SDL_FreeSurface(surfaceTexte);
+    SDL_DestroyTexture(textureTexte);
 }

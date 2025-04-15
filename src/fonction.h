@@ -2,20 +2,25 @@
 #define FONCTION_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define LONGUEUR_FENETRE 960
 #define LARGEUR_FENETRE 540
-#define SOL 390
+
+#define TAILLE_PERSO 30
+#define SOL ((MAP_HAUTEUR - 3) * BLOC_SIZE - TAILLE_PERSO)
 #define GRAVITE 0.5f
-#define FORCE_SAUT -12.0f
+#define FORCE_SAUT -11.0f
 #define VITESSE_DEPLACEMENT 5
 
-#define BLOC_SIZE 50
+#define BLOC_SIZE 30
 #define MAP_LARGEUR 150
-#define MAP_HAUTEUR 12
+#define MAP_HAUTEUR 18
+
+#define BLOC_PIECE 3
 
 extern int map[MAP_HAUTEUR][MAP_LARGEUR];
 
@@ -38,5 +43,7 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX);
 SDL_Texture *chargerTextureBMP(SDL_Renderer *renderer, const char *chemin);
 
 SDL_bool detecterCollision(SDL_Rect joueur);
+
+void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police);
 
 #endif

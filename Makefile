@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -I include
-LDFLAGS = -L lib -lmingw32 -lSDL2main -lSDL2 -mwindows
+LDFLAGS = -L lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -mwindows
 
 Programme : main.o fonction.o
 	$(CC) main.o fonction.o -o Jeu $(LDFLAGS)

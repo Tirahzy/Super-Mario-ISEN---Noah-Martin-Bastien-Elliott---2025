@@ -8,6 +8,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    if (TTF_Init() == -1)
+    {
+        printf("Erreur d'initialisation de SDL_ttf : %s\n", TTF_GetError());
+        return 1;
+    }
+
+    TTF_Font *police = TTF_OpenFont("fonts/arial.ttf", 24);
+    if (!police)
+    {
+        printf("Erreur chargement police : %s\n", TTF_GetError());
+        return 1;
+    }
+
     SDL_Window *fenetreJeu = creerFenetre("Mario");
     SDL_Renderer *renderer = creerRenderer(fenetreJeu);
 
@@ -21,7 +34,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    SDL_Rect carre = {100, SOL, 50, 50};
+    SDL_Rect carre = {100, (MAP_HAUTEUR - 3) * BLOC_SIZE - 40, TAILLE_PERSO, TAILLE_PERSO};
 
     SDL_bool enSaut = SDL_FALSE;
     float vitesseSaut = 0;
@@ -30,23 +43,12 @@ int main(int argc, char *argv[])
     int cameraX = 0;
     initialiserMap();
 
+    int nbPieces = 0;
+
     SDL_bool continuer = SDL_TRUE;
     while (continuer)
     {
         gererEvenements(&continuer, &carre, &enSaut, &vitesseSaut, &touches);
-
-        // if (touches.gauche)
-        // {
-        //     carre.x -= VITESSE_DEPLACEMENT;
-        //     if (carre.x < 0)
-        //         carre.x = 0;
-        // }
-        // if (touches.droite)
-        // {
-        //     carre.x += VITESSE_DEPLACEMENT;
-        //     if (carre.x > MAP_LARGEUR * BLOC_SIZE - carre.w)
-        //         carre.x = MAP_LARGEUR * BLOC_SIZE - carre.w;
-        // }
 
         // Déplacement horizontal avec collision
         SDL_Rect testCarre = carre;
@@ -63,75 +65,7 @@ int main(int argc, char *argv[])
                 carre.x = testCarre.x;
         }
 
-        // if (enSaut)
-        // {
-        //     carre.y += vitesseSaut;
-        //     vitesseSaut += GRAVITE;
-
-        //     if (carre.y >= SOL)
-        //     {
-        //         carre.y = SOL;
-        //         enSaut = SDL_FALSE;
-        //         vitesseSaut = 0;
-        //     }
-        // }
-        // else if (touches.saut)
-        // {
-        //     enSaut = SDL_TRUE;
-        //     vitesseSaut = FORCE_SAUT;
-        //     touches.saut = SDL_FALSE;
-        // }
-
-        // if (enSaut)
-        // {
-        //     carre.y += vitesseSaut;
-        //     vitesseSaut += GRAVITE;
-
-        //     // Vérifier collision vers le bas
-        //     SDL_Rect testBas = carre;
-        //     testBas.y += 1; // Petit déplacement vers le bas pour détection
-
-        //     if (detecterCollision(testBas))
-        //     {
-        //         // Ajuster la position juste au-dessus du bloc
-        //         carre.y = ((carre.y + carre.h) / BLOC_SIZE) * BLOC_SIZE - carre.h;
-        //         enSaut = SDL_FALSE;
-        //         vitesseSaut = 0;
-        //     }
-
-        //     // Vérifier collision vers le haut
-        //     SDL_Rect testHaut = carre;
-        //     testHaut.y -= 1; // Petit déplacement vers le haut
-
-        //     if (detecterCollision(testHaut) && vitesseSaut < 0)
-        //     {
-        //         carre.y = ((carre.y / BLOC_SIZE) + 1) * BLOC_SIZE;
-        //         vitesseSaut = 0; // Annuler la vitesse ascendante
-        //     }
-        // }
-        // else
-        // {
-        //     // Vérifier si on est sur le sol
-        //     SDL_Rect testSol = carre;
-        //     testSol.y += 1; // Petit déplacement vers le bas
-
-        //     if (!detecterCollision(testSol))
-        //     {
-        //         // On n'est plus sur le sol - commencer à tomber
-        //         enSaut = SDL_TRUE;
-        //         vitesseSaut = 0;
-        //     }
-        //     else if (touches.saut)
-        //     {
-        //         // Saut seulement si on est sur le sol
-        //         enSaut = SDL_TRUE;
-        //         vitesseSaut = FORCE_SAUT;
-        //         touches.saut = SDL_FALSE;
-        //     }
-        // }
-
         // Saut avec collision
-
         if (enSaut)
         {
             carre.y += vitesseSaut;
@@ -142,7 +76,6 @@ int main(int argc, char *argv[])
             testBas.y += 1;
             if (vitesseSaut > 0 && detecterCollision(testBas))
             {
-                // Ajustement pour coller au bloc sans le traverser
                 carre.y = ((carre.y + carre.h) / BLOC_SIZE) * BLOC_SIZE - carre.h;
                 enSaut = SDL_FALSE;
                 vitesseSaut = 0;
@@ -174,6 +107,24 @@ int main(int argc, char *argv[])
                 touches.saut = SDL_FALSE;
             }
         }
+        // Detection piece
+        int gauche = carre.x / BLOC_SIZE;
+        int droite = (carre.x + carre.w - 1) / BLOC_SIZE;
+        int haut = carre.y / BLOC_SIZE;
+        int bas = (carre.y + carre.h - 1) / BLOC_SIZE;
+
+        for (int y = haut; y <= bas; y++)
+        {
+            for (int x = gauche; x <= droite; x++)
+            {
+                // grâce aux calculs précédents et aux collisions qui empêchent de sortir
+                if (map[y][x] == BLOC_PIECE)
+                {
+                    map[y][x] = 0; // Supprimer la pièce
+                    nbPieces++;
+                }
+            }
+        }
 
         // Ne pas sortir de la map
         if (carre.x < 0)
@@ -195,10 +146,12 @@ int main(int argc, char *argv[])
         dessinerMap(renderer, cameraX);
 
         // Perso
-
         dessinerCarre(renderer, (SDL_Rect){carre.x - cameraX, carre.y, carre.w, carre.h});
         // SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
         // SDL_RenderCopy(renderer, persoTexture, NULL, &dst);
+
+        // Afficher le score
+        afficherScore(renderer, nbPieces, police);
 
         SDL_RenderPresent(renderer);
 
@@ -206,9 +159,10 @@ int main(int argc, char *argv[])
     }
 
     SDL_DestroyTexture(persoTexture);
-
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(fenetreJeu);
+    TTF_CloseFont(police);
+    TTF_Quit();
     SDL_Quit();
     return 0;
 }
