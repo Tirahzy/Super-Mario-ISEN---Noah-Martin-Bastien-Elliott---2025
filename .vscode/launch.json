@@ -2,14 +2,33 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Lancer Jeu.exe",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "c:/Users/nonon/Desktop/projetMario/Jeu.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "c:/Users/nonon/Desktop/projetMario",
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/mingw64/bin/gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Activer pretty-printing pour gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/ellio/Documents/Junia/Cir1/Programmation/C/Projet Mario/ProjetMario",
-      "program": "c:/Users/ellio/Documents/Junia/Cir1/Programmation/C/Projet Mario/ProjetMario/build/Debug/outDebug",
+      "cwd": "c:/Users/nonon/Desktop/projetMario/src",
+      "program": "c:/Users/nonon/Desktop/projetMario/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
