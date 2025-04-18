@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     if (TTF_Init() == -1)
     {
         printf("Erreur d'initialisation de SDL_ttf : %s\n", TTF_GetError());
+        SDL_Quit();
         return 1;
     }
 
@@ -18,16 +19,19 @@ int main(int argc, char *argv[])
     if (!police)
     {
         printf("Erreur chargement police : %s\n", TTF_GetError());
+        TTF_Quit();
+        SDL_Quit();
         return 1;
     }
 
     SDL_Window *fenetreJeu = creerFenetre("Mario");
     SDL_Renderer *renderer = creerRenderer(fenetreJeu);
+    TexturesJeu textures = chargerTextures(renderer);
 
-    SDL_Texture *persoTexture = chargerTextureBMP(renderer, "img/perso.bmp");
-    if (!persoTexture)
+    if (!textures.perso)
     {
-        printf("Échec du chargement de l'image ! Vérifie le chemin\n");
+        printf("Échec du chargement de l'image du personnage !\n");
+        libererTextures(textures);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(fenetreJeu);
         TTF_CloseFont(police);
@@ -44,28 +48,10 @@ int main(int argc, char *argv[])
     int nbPieces = 0;
     int scoreGameOver = 0;
 
-    char niveau1[MAP_HAUTEUR][MAP_LARGEUR] = {
-        "************************************************************************************************************************************************************************************************",
-        "*                                                                                                                                                                                              *",
-        "*                                                      $$$                   $$$$$                                $                                                                            *",
-        "*                    #####                            #####                                                      ###                              $$$                                          *",
-        "*                                                                              ##                                                               #####                                          *",
-        "*         $$        ######      $$$                                           ####                                                      ####                                                   *",
-        "*        ####                  #####                                                          $$$$                                   ####     #                                                *",
-        "*                                                                                                                                 ####                                                         *",
-        "*    ###                                                                     ####     g                                      ####                                                              *",
-        "*                                                                                                                     ####                                                                     *",
-        "*                                                                                                               ####                            ###                                            *",
-        "*                                                                         ######    g         #####                                        #####      g                                        *",
-        "*              ##########                                                                                                               ##                                                     *",
-        "*                            ##                                                                     ##########       g                                  ###########                            *",
-        "*                                    ###                                                                                                                                                       *",
-        "*                    g                                    g                    g                             g             g                      g                                            *",
-        "* P                                                                                                                                                                                           #*",
-        "================================================================================================================================================================================================"};
-
+    GestionnaireFPS fps;
+    initialiserFPS(&fps);
+    initialiserEffets();
     initialiserMap();
-    initialiserEnnemis(niveau1);
 
     Bouton boutonsMenu[2];
     initialiserBoutons(boutonsMenu, 2);
@@ -80,14 +66,14 @@ int main(int argc, char *argv[])
     boutonsGameOver[0].rect.y = debutY;
     boutonsGameOver[0].rect.w = largeur;
     boutonsGameOver[0].rect.h = hauteur;
-    boutonsGameOver[0].texte = "Rejouer";
+    boutonsGameOver[0].texte = strdup("Rejouer");
     boutonsGameOver[0].hover = SDL_FALSE;
 
     boutonsGameOver[1].rect.x = (LONGUEUR_FENETRE - largeur) / 2;
     boutonsGameOver[1].rect.y = debutY + hauteur + espacement;
     boutonsGameOver[1].rect.w = largeur;
     boutonsGameOver[1].rect.h = hauteur;
-    boutonsGameOver[1].texte = "Menu Principal";
+    boutonsGameOver[1].texte = strdup("Menu Principal");
     boutonsGameOver[1].hover = SDL_FALSE;
 
     int etatJeu = ETAT_MENU;
@@ -95,6 +81,8 @@ int main(int argc, char *argv[])
 
     while (continuer)
     {
+        fps.dernierTemps = SDL_GetTicks();
+
         switch (etatJeu)
         {
         case ETAT_MENU:
@@ -108,7 +96,6 @@ int main(int argc, char *argv[])
                 carre.y = (MAP_HAUTEUR - 3) * BLOC_SIZE - 40;
                 nbPieces = 0;
                 initialiserMap();
-                initialiserEnnemis(niveau1);
             }
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -117,13 +104,11 @@ int main(int argc, char *argv[])
             SDL_Color couleurTitre = {255, 255, 255};
             SDL_Surface *surfaceTitre = TTF_RenderText_Solid(police, "Super Mario ISEN", couleurTitre);
             SDL_Texture *textureTitre = SDL_CreateTextureFromSurface(renderer, surfaceTitre);
-
             SDL_Rect destTitre = {
                 (LONGUEUR_FENETRE - surfaceTitre->w) / 2,
                 100,
                 surfaceTitre->w,
                 surfaceTitre->h};
-
             SDL_RenderCopy(renderer, textureTitre, NULL, &destTitre);
             SDL_FreeSurface(surfaceTitre);
             SDL_DestroyTexture(textureTitre);
@@ -144,7 +129,7 @@ int main(int argc, char *argv[])
             }
             if (touches.droite)
             {
-                testCarre.x = carre.x + VITESSE_DEPLACEMENT;
+                testCarre.x += VITESSE_DEPLACEMENT;
                 if (!detecterCollision(testCarre))
                     carre.x = testCarre.x;
             }
@@ -187,14 +172,10 @@ int main(int argc, char *argv[])
                     touches.saut = SDL_FALSE;
                 }
             }
-            
-            if (enSaut)
+
+            if (enSaut && sauterSurEnnemi(carre, vitesseSaut))
             {
-                if (sauterSurEnnemi(carre, vitesseSaut))
-                {
-                    
-                    vitesseSaut = FORCE_SAUT / 1.5f;
-                }
+                vitesseSaut = FORCE_SAUT / 1.5f;
             }
 
             mettreAJourEnnemis();
@@ -223,28 +204,24 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (carre.x < 0)
-                carre.x = 0;
-            if (carre.x > MAP_LARGEUR * BLOC_SIZE - carre.w)
-                carre.x = MAP_LARGEUR * BLOC_SIZE - carre.w;
+            carre.x = SDL_clamp(carre.x, 0, MAP_LARGEUR * BLOC_SIZE - carre.w);
 
             cameraX = carre.x + carre.w / 2 - LONGUEUR_FENETRE / 2;
-            if (cameraX < 0)
-                cameraX = 0;
-            if (cameraX > MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE)
-                cameraX = MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE;
+            cameraX = SDL_clamp(cameraX, 0, MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE);
 
             SDL_SetRenderDrawColor(renderer, 129, 212, 255, 255);
             SDL_RenderClear(renderer);
 
-            dessinerMap(renderer, cameraX);
-            dessinerEnnemis(renderer, cameraX);
-            dessinerEffets(renderer, cameraX); // Ajouter cette ligne
+            dessinerMap(renderer, cameraX, textures);
+            dessinerEnnemis(renderer, cameraX, textures);
+            dessinerEffets(renderer, cameraX);
 
             SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
-            SDL_RenderCopy(renderer, persoTexture, NULL, &dst);
+            SDL_RenderCopy(renderer, textures.perso, NULL, &dst);
 
             afficherScore(renderer, nbPieces, police);
+            calculerFPS(&fps);
+            afficherFPS(renderer, &fps, police);
             SDL_RenderPresent(renderer);
             break;
 
@@ -255,56 +232,23 @@ int main(int argc, char *argv[])
 
             while (SDL_PollEvent(&event))
             {
-                switch (event.type)
-                {
-                case SDL_QUIT:
+                if (event.type == SDL_QUIT)
                     continuer = SDL_FALSE;
-                    break;
-
-                case SDL_MOUSEMOTION:
+                else if (event.type == SDL_MOUSEMOTION)
                 {
-                    int mouseX = event.motion.x;
-                    int mouseY = event.motion.y;
-
+                    int mouseX = event.motion.x, mouseY = event.motion.y;
                     for (int i = 0; i < 2; i++)
-                    {
-                        if (mouseX >= boutonsGameOver[i].rect.x && mouseX <= boutonsGameOver[i].rect.x + boutonsGameOver[i].rect.w &&
-                            mouseY >= boutonsGameOver[i].rect.y && mouseY <= boutonsGameOver[i].rect.y + boutonsGameOver[i].rect.h)
-                        {
-                            boutonsGameOver[i].hover = SDL_TRUE;
-                        }
-                        else
-                        {
-                            boutonsGameOver[i].hover = SDL_FALSE;
-                        }
-                    }
+                        boutonsGameOver[i].hover = pointDansRect(mouseX, mouseY, boutonsGameOver[i].rect);
                 }
-                break;
-
-                case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.button == SDL_BUTTON_LEFT)
-                    {
-                        int mouseX = event.button.x;
-                        int mouseY = event.button.y;
-
-                        for (int i = 0; i < 2; i++)
-                        {
-                            if (mouseX >= boutonsGameOver[i].rect.x && mouseX <= boutonsGameOver[i].rect.x + boutonsGameOver[i].rect.w &&
-                                mouseY >= boutonsGameOver[i].rect.y && mouseY <= boutonsGameOver[i].rect.y + boutonsGameOver[i].rect.h)
-                            {
-                                choix = i;
-                            }
-                        }
-                    }
-                    break;
-
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                    {
-                        etatJeu = ETAT_MENU;
-                    }
-                    break;
+                else if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+                {
+                    int mouseX = event.button.x, mouseY = event.button.y;
+                    for (int i = 0; i < 2; i++)
+                        if (pointDansRect(mouseX, mouseY, boutonsGameOver[i].rect))
+                            choix = i;
                 }
+                else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+                    etatJeu = ETAT_MENU;
             }
 
             if (choix == 0)
@@ -313,14 +257,12 @@ int main(int argc, char *argv[])
                 carre.y = (MAP_HAUTEUR - 3) * BLOC_SIZE - 40;
                 nbPieces = 0;
                 initialiserMap();
-                initialiserEnnemis(niveau1);
                 etatJeu = ETAT_JEU;
             }
             else if (choix == 1)
             {
                 etatJeu = ETAT_MENU;
             }
-        }
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
@@ -328,30 +270,25 @@ int main(int argc, char *argv[])
             SDL_Color couleurGameOver = {255, 0, 0, 255};
             SDL_Surface *surfaceGameOver = TTF_RenderText_Solid(police, "GAME OVER", couleurGameOver);
             SDL_Texture *textureGameOver = SDL_CreateTextureFromSurface(renderer, surfaceGameOver);
-
             SDL_Rect destGameOver = {
                 (LONGUEUR_FENETRE - surfaceGameOver->w) / 2,
                 100,
                 surfaceGameOver->w,
                 surfaceGameOver->h};
-
             SDL_RenderCopy(renderer, textureGameOver, NULL, &destGameOver);
             SDL_FreeSurface(surfaceGameOver);
             SDL_DestroyTexture(textureGameOver);
 
             char textScore[50];
             sprintf(textScore, "Score final : %d", scoreGameOver);
-
             SDL_Color couleurScore = {255, 255, 255, 255};
             SDL_Surface *surfaceScore = TTF_RenderText_Solid(police, textScore, couleurScore);
             SDL_Texture *textureScore = SDL_CreateTextureFromSurface(renderer, surfaceScore);
-
             SDL_Rect destScore = {
                 (LONGUEUR_FENETRE - surfaceScore->w) / 2,
                 170,
                 surfaceScore->w,
                 surfaceScore->h};
-
             SDL_RenderCopy(renderer, textureScore, NULL, &destScore);
             SDL_FreeSurface(surfaceScore);
             SDL_DestroyTexture(textureScore);
@@ -360,15 +297,20 @@ int main(int argc, char *argv[])
             SDL_RenderPresent(renderer);
             break;
         }
+        }
 
-        SDL_Delay(16);
+        limiterFPS(&fps);
     }
 
-    SDL_DestroyTexture(persoTexture);
+    // Libération mémoire
+    free(boutonsGameOver[0].texte);
+    free(boutonsGameOver[1].texte);
+    libererTextures(textures);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(fenetreJeu);
     TTF_CloseFont(police);
     TTF_Quit();
     SDL_Quit();
+
     return 0;
 }

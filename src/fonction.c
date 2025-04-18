@@ -87,21 +87,21 @@ void initialiserMap()
     char marioMap[MAP_HAUTEUR][MAP_LARGEUR] = {
         "************************************************************************************************************************************************************************************************",
         "*                                                                                                                                                                                              *",
-        "*                        $$$                                $$$                    $$$$$                             $$$                              $$$                                       *",
-        "*                       #####                ##########    #####       #           #####                            #####          #                #####                                       *",
-        "*                #                                                     ##                                              ##                              ##                                       *",
-        "*         $$$   ###    #####       $$$                                ####                      ####                 ####      #                      ####                                      *",
-        "*        #####                    #####                                         #              ######               ######                           ######                                     *",
-        "*                                                          ####                ###                                                  ###                                                         *",
-        "*    ####                                                                    #######                                          ####                                                              *",
-        "*                                         ####                                                                       ####                                                                       *",
-        "*                                        ######                                           ####                                                     ####                                         *",
-        "*                ##  g                                   ######    g         #####                        ####                                     #####                                        *",
-        "*              ##########                                                                                                                       ##                g                            *",
+        "*                        $$$                                $$$                    $$$$$                             $$$                              $$$                                      *",
+        "*                       #####                ##########    #####       #           #####                            #####          #                #####                                      *",
+        "*                #                                                     ##                                              ##                              ##                                      *",
+        "*         $$$   ###    #####       $$$                                ####                      ####                 ####      #                      ####                                     *",
+        "*        #####                    #####                                         #              ######               ######                           ######                                    *",
+        "*                                                          ####                ###                                                  ###                                                        *",
+        "*    ####                                                                    #######                                          ####                                                             *",
+        "*                                         ####                                                                       ####                                                                      *",
+        "*                                        ######                                           ####                                                     ####                                        *",
+        "*                ##  g                                   ######    g         #####                        ####                                     #####                                       *",
+        "*              ##########                                                                                                                       ##                                             *",
         "*                            ##         #####                                             ##########       g                                                  ###########                      *",
-        "*     $$                            ###                                                                                     $$$                    $$$                                          *",
-        "*    ####      g       g                  g       g         g                 g                   g             g          #####      g            #####                                       *",
-        "* P                                                                                                                                                                                           #*",
+        "*     $$                         ?  ###                                                                                     $$$                    $$$                                         *",
+        "*    ####      g       g                  g       g         g        T        g                   g             g          #####      g            #####                                       *",
+        "* P                                                                  T                                                                                                                        #*",
         "================================================================================================================================================================================================"
     };
     
@@ -225,68 +225,14 @@ void dessinerEffets(SDL_Renderer *renderer, int cameraX)
     }
 }
 
-void dessinerMap(SDL_Renderer *renderer, int cameraX)
-{
-    for (int y = 0; y < MAP_HAUTEUR; y++)
-    {
-        for (int x = 0; x < MAP_LARGEUR; x++)
-        {
-            SDL_Rect bloc = {
-                x * BLOC_SIZE - cameraX,
-                y * BLOC_SIZE,
-                BLOC_SIZE,
-                BLOC_SIZE};
-
-            switch (map[y][x])
-            {
-            case 1: // Sol - couleur marron
-                SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);
-                SDL_RenderFillRect(renderer, &bloc);
-                break;
-            case 2: // Blocs - couleur bleue/grise
-                SDL_SetRenderDrawColor(renderer, 80, 80, 200, 255);
-                SDL_RenderFillRect(renderer, &bloc);
-                break;
-            case BLOC_PIECE: // Pièces - couleur or
-                SDL_SetRenderDrawColor(renderer, 255, 215, 0, 255);
-                SDL_RenderFillRect(renderer, &bloc);
-                break;
-            case BLOC_QUESTION: // Blocs à points d'interrogation - orange
-                SDL_SetRenderDrawColor(renderer, 255, 165, 0, 255);
-                SDL_RenderFillRect(renderer, &bloc);
-                break;
-            case BLOC_TUYAU: // Tuyaux - vert
-                SDL_SetRenderDrawColor(renderer, 0, 150, 0, 255);
-                SDL_RenderFillRect(renderer, &bloc);
-                break;
-            default:
-                break;
-            }
-        }
-    }
+void dessinerTexture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, int cameraX) {
+    SDL_Rect dest = {x * BLOC_SIZE - cameraX, y * BLOC_SIZE, w * BLOC_SIZE, h * BLOC_SIZE};
+    SDL_RenderCopy(renderer, texture, NULL, &dest);
 }
 
-void dessinerEnnemis(SDL_Renderer *renderer, int cameraX)
-{
-    for (int i = 0; i < MAX_ENNEMIS; i++)
-    {
-        if (ennemis[i].actif)
-        {
-            SDL_Rect ennemiEcran = {
-                ennemis[i].rect.x - cameraX,
-                ennemis[i].rect.y,
-                ennemis[i].rect.w,
-                ennemis[i].rect.h
-            };
-            
-            if (ennemiEcran.x + ennemiEcran.w >= 0 && ennemiEcran.x <= LONGUEUR_FENETRE)
-            {
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-                SDL_RenderFillRect(renderer, &ennemiEcran);
-            }
-        }
-    }
-}
+
+
+
 
 SDL_bool detecterCollisionEntreEnnemis(SDL_Rect ennemi, int indexEnnemi)
 {
@@ -461,6 +407,12 @@ SDL_bool detecterCollision(SDL_Rect joueur)
     int haut = joueur.y / BLOC_SIZE;
     int bas = (joueur.y + joueur.h - 1) / BLOC_SIZE;
 
+    // Limiter les indices pour éviter les débordements de tableau
+    if (gauche < 0) gauche = 0;
+    if (droite >= MAP_LARGEUR) droite = MAP_LARGEUR - 1;
+    if (haut < 0) haut = 0;
+    if (bas >= MAP_HAUTEUR) bas = MAP_HAUTEUR - 1;
+
     for (int y = haut; y <= bas; y++)
     {
         for (int x = gauche; x <= droite; x++)
@@ -482,7 +434,17 @@ void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police)
 
     SDL_Color couleur = {255, 255, 255};
     SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, texte, couleur);
+    if (!surfaceTexte) {
+        printf("Erreur lors du rendu du texte: %s\n", TTF_GetError());
+        return;
+    }
+    
     SDL_Texture *textureTexte = SDL_CreateTextureFromSurface(renderer, surfaceTexte);
+    if (!textureTexte) {
+        printf("Erreur lors de la création de la texture du texte: %s\n", SDL_GetError());
+        SDL_FreeSurface(surfaceTexte);
+        return;
+    }
 
     SDL_Rect dest = {10, 10, surfaceTexte->w, surfaceTexte->h};
     SDL_RenderCopy(renderer, textureTexte, NULL, &dest);
@@ -526,13 +488,22 @@ void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons
         
         SDL_RenderFillRect(renderer, &boutons[i].rect);
         
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderDrawRect(renderer, &boutons[i].rect);
-        
-        SDL_Color couleurTexte = {255, 255, 255};
+        // Rendre le texte du bouton
+        SDL_Color couleurTexte = {255, 255, 255};  // blanc
         SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, boutons[i].texte, couleurTexte);
-        SDL_Texture *textureTexte = SDL_CreateTextureFromSurface(renderer, surfaceTexte);
+        if (!surfaceTexte) {
+            printf("Erreur lors du rendu du texte: %s\n", TTF_GetError());
+            continue;
+        }
         
+        SDL_Texture *textureTexte = SDL_CreateTextureFromSurface(renderer, surfaceTexte);
+        if (!textureTexte) {
+            printf("Erreur lors de la création de la texture du texte: %s\n", SDL_GetError());
+            SDL_FreeSurface(surfaceTexte);
+            continue;
+        }
+        
+        // Centrer le texte dans le bouton
         SDL_Rect destTexte = {
             boutons[i].rect.x + (boutons[i].rect.w - surfaceTexte->w) / 2,
             boutons[i].rect.y + (boutons[i].rect.h - surfaceTexte->h) / 2,
@@ -546,7 +517,6 @@ void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons
         SDL_DestroyTexture(textureTexte);
     }
 }
-
 int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons)
 {
     SDL_Event event;
@@ -556,11 +526,11 @@ int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons
     {
         switch (event.type)
         {
-        case SDL_QUIT:
-            *continuer = SDL_FALSE;
-            return ETAT_MENU;
-            
-        case SDL_MOUSEMOTION:
+            case SDL_QUIT:
+                *continuer = SDL_FALSE;
+                break;
+                
+            case SDL_MOUSEMOTION:
             {
                 int mouseX = event.motion.x;
                 int mouseY = event.motion.y;
@@ -580,40 +550,183 @@ int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons
             }
             break;
             
-        case SDL_MOUSEBUTTONDOWN:
-            if (event.button.button == SDL_BUTTON_LEFT)
-            {
-                int mouseX = event.button.x;
-                int mouseY = event.button.y;
-                
-                for (int i = 0; i < nombreBoutons; i++)
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT)
                 {
-                    if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
-                        mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
+                    int mouseX = event.button.x;
+                    int mouseY = event.button.y;
+                    
+                    for (int i = 0; i < nombreBoutons; i++)
                     {
-                        if (i == 0)
+                        if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
+                            mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
                         {
-                            return ETAT_JEU;
-                        }
-                        else if (i == 1)
-                        {
-                            *continuer = SDL_FALSE;
-                            return ETAT_MENU;
+                            // Si c'est le bouton "Jouer"
+                            if (i == 0)
+                                return ETAT_JEU;
+                            // Si c'est le bouton "Quitter"
+                            else if (i == 1)
+                                *continuer = SDL_FALSE;
                         }
                     }
                 }
-            }
-            break;
-            
-        case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE)
-            {
-                *continuer = SDL_FALSE;
-                return ETAT_MENU;
-            }
-            break;
+                break;
+                
+            case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    *continuer = SDL_FALSE;
+                }
+                break;
         }
     }
     
-    return choix;
+    return -1;  // Aucun état spécifique choisi
+}
+void initialiserFPS(GestionnaireFPS *fps)
+{
+    fps->dernierTemps = SDL_GetTicks();
+    fps->frameActuelle = 0;
+    fps->frameCount = 0;
+    fps->fps = 0;
+    fps->dernierCalculFPS = SDL_GetTicks();
+}
+
+void limiterFPS(GestionnaireFPS *fps)
+{
+    fps->frameActuelle++;
+    
+    // Calculer combien de temps a pris cette frame
+    unsigned int frameTicks = SDL_GetTicks() - fps->dernierTemps;
+    
+    // Si la frame a été rendue trop rapidement, on attend
+    if (frameTicks < FRAME_TIME_MS)
+    {
+        SDL_Delay(FRAME_TIME_MS - frameTicks);
+    }
+    
+    fps->dernierTemps = SDL_GetTicks();
+}
+
+void calculerFPS(GestionnaireFPS *fps)
+{
+    fps->frameCount++;
+    
+    // Mettre à jour le FPS toutes les secondes
+    unsigned int maintenant = SDL_GetTicks();
+    if (maintenant - fps->dernierCalculFPS >= 1000)
+    {
+        fps->fps = fps->frameCount;
+        fps->frameCount = 0;
+        fps->dernierCalculFPS = maintenant;
+    }
+}
+
+void afficherFPS(SDL_Renderer *renderer, GestionnaireFPS *fps, TTF_Font *police)
+{
+    char texte[16];
+    sprintf(texte, "FPS: %.1f", fps->fps);
+    
+    SDL_Color couleur = {255, 255, 255};
+    SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, texte, couleur);
+    if (!surfaceTexte) {
+        return;
+    }
+    
+    SDL_Texture *textureTexte = SDL_CreateTextureFromSurface(renderer, surfaceTexte);
+    if (!textureTexte) {
+        SDL_FreeSurface(surfaceTexte);
+        return;
+    }
+    
+    SDL_Rect dest = {LONGUEUR_FENETRE - surfaceTexte->w - 10, 10, surfaceTexte->w, surfaceTexte->h};
+    SDL_RenderCopy(renderer, textureTexte, NULL, &dest);
+    
+    SDL_FreeSurface(surfaceTexte);
+    SDL_DestroyTexture(textureTexte);
+}
+SDL_bool pointDansRect(int x, int y, SDL_Rect rect)
+{
+    return (x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) ? SDL_TRUE : SDL_FALSE;
+}
+
+TexturesJeu chargerTextures(SDL_Renderer *renderer)
+{
+    TexturesJeu textures;
+    
+    textures.perso = chargerTextureBMP(renderer, "img/perso.bmp");
+    textures.brique = chargerTextureBMP(renderer, "img/brique.bmp");
+    textures.piece = chargerTextureBMP(renderer, "img/piece.bmp");
+    textures.tuyau = chargerTextureBMP(renderer, "img/tuyau.bmp");
+    textures.ennemi = chargerTextureBMP(renderer, "img/ennemis.bmp");
+    textures.questionBloc = chargerTextureBMP(renderer, "img/question.bmp");
+    textures.sol = chargerTextureBMP(renderer, "img/sol.bmp");
+    
+    return textures;
+}
+
+void libererTextures(TexturesJeu textures)
+{
+    if (textures.perso) SDL_DestroyTexture(textures.perso);
+    if (textures.brique) SDL_DestroyTexture(textures.brique);
+    if (textures.piece) SDL_DestroyTexture(textures.piece);
+    if (textures.tuyau) SDL_DestroyTexture(textures.tuyau);
+    if (textures.ennemi) SDL_DestroyTexture(textures.ennemi);
+    if (textures.questionBloc) SDL_DestroyTexture(textures.questionBloc);
+}
+void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
+{
+    for (int y = 0; y < MAP_HAUTEUR; y++)
+    {
+        for (int x = 0; x < MAP_LARGEUR; x++)
+        {
+            int bloc = map[y][x];
+            if (bloc == 0) continue;
+
+            SDL_Texture *texture = NULL;
+
+            switch (bloc)
+            {
+                case 1: // Sol
+                    texture = textures.sol;
+                    break;
+                case 2: // #
+                    texture = textures.brique;
+                    break;
+                case BLOC_PIECE: // $
+                    texture = textures.piece;
+                    break;
+                case BLOC_TUYAU: // T
+                    texture = textures.tuyau;
+                    break;
+                case BLOC_QUESTION: // ?
+                    texture = textures.questionBloc;
+                    break;
+                default:
+                    texture = NULL;
+                    break;
+            }
+
+            if (texture)
+                dessinerTexture(renderer, texture, x, y, 1, 1, cameraX);
+        }
+    }
+}
+
+
+void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
+{
+    for (int i = 0; i < MAX_ENNEMIS; i++)
+    {
+        if (ennemis[i].actif)
+        {
+            SDL_Rect dst = {
+                ennemis[i].rect.x - cameraX,
+                ennemis[i].rect.y,
+                ennemis[i].rect.w,
+                ennemis[i].rect.h
+            };
+            SDL_RenderCopy(renderer, textures.ennemi, NULL, &dst);
+        }
+    }
 }

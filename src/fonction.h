@@ -32,15 +32,24 @@
 
 #define MAX_EFFETS 20
 
-// États du jeu
 #define ETAT_MENU 0
 #define ETAT_JEU 1
 #define ETAT_GAME_OVER 2
 
+#define FPS_CIBLE 60
+#define FRAME_TIME_MS (1000 / FPS_CIBLE)
+
 extern int map[MAP_HAUTEUR][MAP_LARGEUR];
 
-typedef struct
-{
+typedef struct {
+    unsigned int dernierTemps;
+    unsigned int frameActuelle;
+    unsigned int frameCount;
+    float fps;
+    unsigned int dernierCalculFPS;
+} GestionnaireFPS;
+
+typedef struct {
     SDL_bool gauche;
     SDL_bool droite;
     SDL_bool saut;
@@ -58,6 +67,16 @@ typedef struct {
     SDL_bool actif;
 } Effet;
 
+typedef struct {
+    SDL_Texture *perso;
+    SDL_Texture *brique;
+    SDL_Texture *piece;
+    SDL_Texture *tuyau;
+    SDL_Texture *ennemi;
+    SDL_Texture *questionBloc;
+    SDL_Texture *sol;
+} TexturesJeu;
+
 extern Ennemi ennemis[MAX_ENNEMIS];
 extern Effet effets[MAX_EFFETS];
 
@@ -70,29 +89,37 @@ typedef struct {
 SDL_Window *creerFenetre(char nom[]);
 SDL_Renderer *creerRenderer(SDL_Window *fenetre);
 
+void initialiserFPS(GestionnaireFPS *fps);
+void limiterFPS(GestionnaireFPS *fps);
+void calculerFPS(GestionnaireFPS *fps);
+void afficherFPS(SDL_Renderer *renderer, GestionnaireFPS *fps, TTF_Font *police);
+
+TexturesJeu chargerTextures(SDL_Renderer *renderer);
+void libererTextures(TexturesJeu textures);
+
 void dessinerCarre(SDL_Renderer *renderer, SDL_Rect carre);
 void gererEvenements(SDL_bool *continuer, SDL_Rect *carre, SDL_bool *enSaut, float *vitesseSaut, Touches *touches);
 
 void initialiserMap();
 void initialiserEnnemis(char niveau[][MAP_LARGEUR]);
-void dessinerMap(SDL_Renderer *renderer, int cameraX);
+void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
+void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
 
 void initialiserEffets();
 void ajouterEffetEcrasement(int x, int y);
 void mettreAJourEffets();
 void dessinerEffets(SDL_Renderer *renderer, int cameraX);
 
+void dessinerTexture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, int cameraX);
 SDL_Texture *chargerTextureBMP(SDL_Renderer *renderer, const char *chemin);
 
 SDL_bool detecterCollision(SDL_Rect joueur);
 SDL_bool detecterCollisionEntreEnnemis(SDL_Rect ennemi, int indexEnnemi);
 SDL_bool sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut);
+SDL_bool detecterCollisionEnnemi(SDL_Rect joueur);
+SDL_bool pointDansRect(int x, int y, SDL_Rect rect);
 
 void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police);
-
-void dessinerEnnemis(SDL_Renderer *renderer, int cameraX);
-void mettreAJourEnnemis();
-SDL_bool detecterCollisionEnnemi(SDL_Rect joueur);
 
 void initialiserBoutons(Bouton boutons[], int nombreBoutons);
 void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons, TTF_Font *police);
