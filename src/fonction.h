@@ -1,3 +1,4 @@
+// ======= fonction.h =======
 #ifndef FONCTION_H
 #define FONCTION_H
 
@@ -16,6 +17,7 @@
 #define GRAVITE 0.5f
 #define FORCE_SAUT -11.0f
 #define VITESSE_DEPLACEMENT 5
+#define NOMBRE_NIVEAUX 9
 
 #define BLOC_SIZE 30
 #define MAP_LARGEUR 200
@@ -102,7 +104,7 @@ void libererTextures(TexturesJeu textures);
 void dessinerCarre(SDL_Renderer *renderer, SDL_Rect carre);
 void gererEvenements(SDL_bool *continuer, SDL_Rect *carre, SDL_bool *enSaut, float *vitesseSaut, Touches *touches);
 
-void initialiserMap();
+void initialiserMap(int niveau);
 void initialiserEnnemis(char niveau[][MAP_LARGEUR]);
 void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
 void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
