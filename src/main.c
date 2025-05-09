@@ -188,6 +188,7 @@ int main(int argc, char *argv[])
             {
                 int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
                 if (current_level == NOMBRE_NIVEAUX) {
+                    afficherEcranFin(renderer, police);
                     choix = ETAT_MENU;
                     current_level = 1;
                 }
