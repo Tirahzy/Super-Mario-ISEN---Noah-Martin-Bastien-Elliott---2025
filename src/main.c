@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     int cameraX = 0;
     int nbPieces = 0;
     int scoreGameOver = 0;
+    int scoreFinal = 0;
 
     GestionnaireFPS fps;
     initialiserFPS(&fps);
@@ -75,6 +76,22 @@ int main(int argc, char *argv[])
     boutonsGameOver[1].rect.h = hauteur;
     boutonsGameOver[1].texte = strdup("Menu Principal");
     boutonsGameOver[1].hover = SDL_FALSE;
+
+    // Boutons pour l'écran de niveau terminé
+    Bouton boutonsNiveauTermine[2];
+    boutonsNiveauTermine[0].rect.x = (LONGUEUR_FENETRE - largeur) / 2;
+    boutonsNiveauTermine[0].rect.y = debutY;
+    boutonsNiveauTermine[0].rect.w = largeur;
+    boutonsNiveauTermine[0].rect.h = hauteur;
+    boutonsNiveauTermine[0].texte = strdup("Niveau Suivant");
+    boutonsNiveauTermine[0].hover = SDL_FALSE;
+
+    boutonsNiveauTermine[1].rect.x = (LONGUEUR_FENETRE - largeur) / 2;
+    boutonsNiveauTermine[1].rect.y = debutY + hauteur + espacement;
+    boutonsNiveauTermine[1].rect.w = largeur;
+    boutonsNiveauTermine[1].rect.h = hauteur;
+    boutonsNiveauTermine[1].texte = strdup("Menu Principal");
+    boutonsNiveauTermine[1].hover = SDL_FALSE;
 
     int etatJeu = ETAT_MENU;
     SDL_bool continuer = SDL_TRUE;
@@ -181,6 +198,13 @@ int main(int argc, char *argv[])
             mettreAJourEnnemis();
             mettreAJourEffets();
 
+            if (finDeNiveau(carre))
+{
+    scoreFinal = nbPieces;
+    etatJeu = ETAT_NIVEAU_TERMINE;
+    break; // Important: sortir du switch pour empêcher le reste du traitement de l'ETAT_JEU
+}
+
             if (detecterCollisionEnnemi(carre))
             {
                 scoreGameOver = nbPieces;
@@ -196,13 +220,27 @@ int main(int argc, char *argv[])
             {
                 for (int x = gauche; x <= droite; x++)
                 {
-                    if (x >= 0 && x < MAP_LARGEUR && y >= 0 && y < MAP_HAUTEUR && map[y][x] == BLOC_PIECE)
+                    if (x >= 0 && x < MAP_LARGEUR && y >= 0 && y < MAP_HAUTEUR)
                     {
-                        map[y][x] = 0;
-                        nbPieces++;
+                        if (map[y][x] == BLOC_PIECE)
+                        {
+                            map[y][x] = 0;
+                            nbPieces++;
+                        }
                     }
                 }
             }
+
+            // Vérifier si le joueur a atteint la fin du niveau
+            if (finDeNiveau(carre))
+            {
+                // Le joueur a atteint la fin du niveau
+                // Vous pouvez ajouter un effet de victoire ici si vous le souhaitez
+                scoreGameOver = nbPieces;
+                scoreFinal = nbPieces;
+                etatJeu = ETAT_NIVEAU_TERMINE;
+            }
+            
 
             carre.x = SDL_clamp(carre.x, 0, MAP_LARGEUR * BLOC_SIZE - carre.w);
 
@@ -297,14 +335,67 @@ int main(int argc, char *argv[])
             SDL_RenderPresent(renderer);
             break;
         }
-        }
 
+        case ETAT_NIVEAU_TERMINE:
+        {
+            int nouvelEtat = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
+            
+            if (nouvelEtat == ETAT_JEU)
+            {
+                // Réinitialiser pour le prochain niveau
+                carre.x = 100;
+                carre.y = (MAP_HAUTEUR - 3) * BLOC_SIZE - 40;
+                nbPieces = 0;
+                initialiserMap();
+                etatJeu = ETAT_JEU;
+            }
+            else if (nouvelEtat == ETAT_MENU)
+            {
+                etatJeu = ETAT_MENU;
+            }
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 100, 255); // Fond bleu foncé
+            SDL_RenderClear(renderer);
+
+            SDL_Color couleurVictoire = {255, 215, 0, 255}; // Couleur or
+            SDL_Surface *surfaceVictoire = TTF_RenderText_Solid(police, "NIVEAU TERMINE !", couleurVictoire);
+            SDL_Texture *textureVictoire = SDL_CreateTextureFromSurface(renderer, surfaceVictoire);
+            SDL_Rect destVictoire = {
+                (LONGUEUR_FENETRE - surfaceVictoire->w) / 2,
+                100,
+                surfaceVictoire->w,
+                surfaceVictoire->h};
+            SDL_RenderCopy(renderer, textureVictoire, NULL, &destVictoire);
+            SDL_FreeSurface(surfaceVictoire);
+            SDL_DestroyTexture(textureVictoire);
+
+            char textScore[50];
+            sprintf(textScore, "Pieces collectees : %d", scoreFinal);
+            SDL_Color couleurScore = {255, 255, 255, 255};
+            SDL_Surface *surfaceScore = TTF_RenderText_Solid(police, textScore, couleurScore);
+            SDL_Texture *textureScore = SDL_CreateTextureFromSurface(renderer, surfaceScore);
+            SDL_Rect destScore = {
+                (LONGUEUR_FENETRE - surfaceScore->w) / 2,
+                170,
+                surfaceScore->w,
+                surfaceScore->h};
+            SDL_RenderCopy(renderer, textureScore, NULL, &destScore);
+            SDL_FreeSurface(surfaceScore);
+            SDL_DestroyTexture(textureScore);
+
+            dessinerBoutons(renderer, boutonsNiveauTermine, 2, police);
+            SDL_RenderPresent(renderer);
+            break;
+        }
+        }
         limiterFPS(&fps);
     }
 
     // Libération mémoire
     free(boutonsGameOver[0].texte);
     free(boutonsGameOver[1].texte);
+    free(boutonsNiveauTermine[0].texte);
+    free(boutonsNiveauTermine[1].texte);
     libererTextures(textures);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(fenetreJeu);

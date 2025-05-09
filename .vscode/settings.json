@@ -59,6 +59,7 @@
   "files.associations": {
     "fonction.h": "c",
     "string.h": "c",
-    "sdl.h": "c"
+    "sdl.h": "c",
+    "sdl_ttf.h": "c"
   }
 }

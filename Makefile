@@ -2,10 +2,10 @@ CC = gcc
 CFLAGS = -Wall -I include
 LDFLAGS = -L lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -mwindows
 
-Programme : main.o fonction.o
-	$(CC) main.o fonction.o -o Jeu $(LDFLAGS)
+Programme : main.o fonction.o 
+	$(CC) main.o fonction.o  -o Jeu $(LDFLAGS)
 
-main.o : src/main.c src/fonction.h
+main.o : src/main.c src/fonction.h 
 	$(CC) $(CFLAGS) -c src/main.c -o main.o
 
 fonction.o : src/fonction.c src/fonction.h

@@ -101,9 +101,10 @@ void initialiserMap()
         "*                            ##         #####                                             ##########       g                                                  ###########                      *",
         "*     $$                         ?  ###                                                                                     $$$                    $$$                                         *",
         "*    ####      g       g                  g       g         g        T        g                   g             g          #####      g            #####                                       *",
-        "* P                                                                  T                                                                                                                        #*",
+        "* P                                                                  T                                                                                                                        f*",
         "================================================================================================================================================================================================"
     };
+   
     
     // Remplir la map avec des 0 (vide)
     for (int i = 0; i < MAP_HAUTEUR; i++)
@@ -132,9 +133,13 @@ void initialiserMap()
             case 'T': // Tuyaux (nouveau type)
                 map[y][x] = BLOC_TUYAU;
                 break;
+            case 'f' : // Fin de niveau
+                map[y][x] = BLOC_FIN;
+                break;
             }
         }
     }
+
     
     initialiserEnnemis(marioMap);
 }
@@ -230,7 +235,7 @@ void dessinerTexture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y,
     SDL_RenderCopy(renderer, texture, NULL, &dest);
 }
 
-
+//perso
 
 
 
@@ -420,7 +425,7 @@ SDL_bool detecterCollision(SDL_Rect joueur)
             if (x < 0 || x >= MAP_LARGEUR || y < 0 || y >= MAP_HAUTEUR)
                 continue;
 
-            if (map[y][x] != 0 && map[y][x] != BLOC_PIECE)
+            if (map[y][x] != 0 && map[y][x] != BLOC_PIECE && map[y][x] != BLOC_FIN)
                 return SDL_TRUE;
         }
     }
@@ -654,12 +659,12 @@ TexturesJeu chargerTextures(SDL_Renderer *renderer)
 {
     TexturesJeu textures;
     
-    textures.perso = chargerTextureBMP(renderer, "img/perso.bmp");
+    textures.perso = chargerTextureBMP(renderer, "img/mario.bmp");
     textures.brique = chargerTextureBMP(renderer, "img/brique.bmp");
     textures.piece = chargerTextureBMP(renderer, "img/piece.bmp");
     textures.tuyau = chargerTextureBMP(renderer, "img/tuyau.bmp");
     textures.ennemi = chargerTextureBMP(renderer, "img/ennemis.bmp");
-    textures.questionBloc = chargerTextureBMP(renderer, "img/question.bmp");
+    textures.questionBloc = chargerTextureBMP(renderer, "img/brique.bmp");
     textures.sol = chargerTextureBMP(renderer, "img/sol.bmp");
     
     return textures;
@@ -702,6 +707,9 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
                 case BLOC_QUESTION: // ?
                     texture = textures.questionBloc;
                     break;
+                case BLOC_FIN: // f
+                    texture = textures.brique; // Utiliser la même texture que pour les briques
+                    break;
                 default:
                     texture = NULL;
                     break;
@@ -729,4 +737,115 @@ void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
             SDL_RenderCopy(renderer, textures.ennemi, NULL, &dst);
         }
     }
+}
+// Ajoutez cette fonction à fonction.c pour vérifier si le bloc de fin est bien initialisé
+
+// Fonction modifiée pour ajouter des logs
+SDL_bool finDeNiveau(SDL_Rect joueur) {
+    // Afficher la position du joueur
+    
+    int joueurGaucheBloc = joueur.x / BLOC_SIZE;
+    int joueurDroiteBloc = (joueur.x + joueur.w - 1) / BLOC_SIZE;
+    int joueurHautBloc = joueur.y / BLOC_SIZE;
+    int joueurBasBloc = (joueur.y + joueur.h - 1) / BLOC_SIZE;
+    
+    // Ajouter une marge pour vérifier les blocs adjacents
+    joueurGaucheBloc = SDL_max(0, joueurGaucheBloc - 1);
+    joueurDroiteBloc = SDL_min(MAP_LARGEUR - 1, joueurDroiteBloc + 1);
+    joueurHautBloc = SDL_max(0, joueurHautBloc - 1);
+    joueurBasBloc = SDL_min(MAP_HAUTEUR - 1, joueurBasBloc + 1);
+    
+    // Vérifier tous les blocs dans la zone
+    for (int y = joueurHautBloc; y <= joueurBasBloc; y++) {
+        for (int x = joueurGaucheBloc; x <= joueurDroiteBloc; x++) {
+            
+            if (map[y][x] == BLOC_FIN) {
+
+                
+                // Calculer les coordonnées réelles du bloc de fin
+                SDL_Rect blocFin = {
+                    x * BLOC_SIZE,
+                    y * BLOC_SIZE,
+                    BLOC_SIZE,
+                    BLOC_SIZE
+                };
+                
+                // Vérifier si le joueur touche le bloc de fin
+                if (joueur.x < blocFin.x + blocFin.w &&
+                    joueur.x + joueur.w > blocFin.x &&
+                    joueur.y < blocFin.y + blocFin.h &&
+                    joueur.y + joueur.h > blocFin.y) {
+                    return SDL_TRUE;
+                } 
+            }
+        }
+    }
+    
+    return SDL_FALSE;
+}
+int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nombreBoutons)
+{
+    SDL_Event event;
+    int choix = -1;
+    
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+            case SDL_QUIT:
+                *continuer = SDL_FALSE;
+                break;
+                
+            case SDL_MOUSEMOTION:
+            {
+                int mouseX = event.motion.x;
+                int mouseY = event.motion.y;
+                
+                for (int i = 0; i < nombreBoutons; i++)
+                {
+                    if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
+                        mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
+                    {
+                        boutons[i].hover = SDL_TRUE;
+                    }
+                    else
+                    {
+                        boutons[i].hover = SDL_FALSE;
+                    }
+                }
+            }
+            break;
+            
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT)
+                {
+                    int mouseX = event.button.x;
+                    int mouseY = event.button.y;
+                    
+                    for (int i = 0; i < nombreBoutons; i++)
+                    {
+                        if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
+                            mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
+                        {
+                            // Si c'est le bouton "Niveau Suivant"
+                            if (i == 0)
+                                return ETAT_JEU;
+                            // Si c'est le bouton "Menu Principal"
+                            else if (i == 1)
+                                return ETAT_MENU;
+                        }
+                    }
+                }
+                break;
+                
+            case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                {
+                    return ETAT_MENU;
+                }
+                break;
+        }
+    }
+    
+    return -1;  // Aucun état spécifique choisi
 }

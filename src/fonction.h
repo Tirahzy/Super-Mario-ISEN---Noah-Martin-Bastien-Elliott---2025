@@ -25,6 +25,7 @@
 #define BLOC_ENNEMI 4
 #define BLOC_QUESTION 5
 #define BLOC_TUYAU 6
+#define BLOC_FIN 7
 
 #define MAX_ENNEMIS 20
 #define ENNEMI_LARGEUR 30
@@ -35,6 +36,7 @@
 #define ETAT_MENU 0
 #define ETAT_JEU 1
 #define ETAT_GAME_OVER 2
+#define ETAT_NIVEAU_TERMINE 3
 
 #define FPS_CIBLE 60
 #define FRAME_TIME_MS (1000 / FPS_CIBLE)
@@ -124,5 +126,7 @@ void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police);
 void initialiserBoutons(Bouton boutons[], int nombreBoutons);
 void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons, TTF_Font *police);
 int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons);
+SDL_bool finDeNiveau(SDL_Rect joueur);
+int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nombreBoutons);
 
 #endif
