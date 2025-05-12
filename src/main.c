@@ -192,6 +192,18 @@ int main(int argc, char *argv[])
                     choix = ETAT_MENU;
                     current_level = 1;
                 }
+                if (current_level == 3)
+                {
+                    current_level = 4;
+                    afficherMonde2(renderer, police);
+                    choix = ETAT_JEU;
+                }
+                if (current_level == 5)
+                {
+                    current_level = 6;
+                    afficherMonde3(renderer, police);
+                    choix = ETAT_JEU;
+                }
                 if (choix == ETAT_JEU) {
                 
                     current_level++;

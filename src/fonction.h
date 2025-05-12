@@ -131,6 +131,7 @@ int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons
 SDL_bool finDeNiveau(SDL_Rect joueur);
 int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nombreBoutons);
 void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
+void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
 
 
 #endif
