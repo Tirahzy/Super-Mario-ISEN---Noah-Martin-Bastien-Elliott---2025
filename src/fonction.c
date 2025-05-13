@@ -99,17 +99,16 @@ char niveau1[18][200] = {
     "*                                              ####                                                                                                                                            *",
     "*                                    $       ##    ##                                                                                                                                          *",
     "*                                    #                             $$         $$                                                                                                               *",
-    "*                                  ###                          #####         #####                                     $$                                                                     *",
-    "*    $$$                         #####                          #####         #####                               ####       ####                                                              *",
-    "*    ###      ##?      ###?                                                                               #####               ####                  ###    ##?                                 *",
-    "*                                         g                           g                                                                                                           g            *",
-    "* P                                                                                                                                                                                           f*",
+    "*                                  ###                          #####         #####                                      $$                                                                    *",
+    "*    $$$                         #####                         ######         ######                               ####       ####                                                             *",
+    "*    ###      ##?      ###?                                                                                  #####                ####                  ###    ##?                             *",
+    "*P                                        g       u                   g                           g                                                                                g          f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau2[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                                                                                                                                                                              *",
     "*                      $$$                            $$$                                                                                                                                      *",
     "*                     #####                          #####                                                                                                                                     *",
     "*                                                                    $$$                                                                                                                       *",
@@ -123,14 +122,14 @@ char niveau2[18][200] = {
     "*                  #####                                                                           ###                                                                                         *",
     "*                                 g               ####                             ###           #####                                                                                         *",
     "*       $$                                        ####         g      ?      g                                                                                                                 *",
-    "*      ####         g        g         g                                                T           g             g                                                                            *",
-    "* P                                                                                     T                                                                                                     f*",
+    "*      ####         g        g         g                                                12          g             g                                                                            *",
+    "* P                                                                                     34                                                                                                    f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau3[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                                                                                                                                                                              *",
     "*                                                                                        $$$                                                                                                   *",
     "*                                                                       #              #####                                                                                                   *",
     "*                                                                      ###                                                                                                                     *",
@@ -146,12 +145,12 @@ char niveau3[18][200] = {
     "*     $$          ?                          g                                                     ######                                                                                      *",
     "*    ####     g       g       T      g                      g        T         g          g                g                                                                                   *",
     "* P                           T                                      T                                                                                                                        f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau4[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                                                                                                                                                                              *",
     "*                                                                                                                                                                                              *",
     "*                                      ##########################################                                                                                                              *",
     "*                                      #                                        #                                                                                                              *",
@@ -167,12 +166,12 @@ char niveau4[18][200] = {
     "*      #    #####      #####     #              ?        ?       ?                     ##     g   T  #                                                                                         *",
     "*      #                         #      g             g      g       g                  #        T   #                                                                                         *",
     "* P    #                                                                                #            #                                                                                        f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau5[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                                                                                                                                                                              *",
     "*     $$$                 $$$                              $$$                                                                                                                                 *",
     "*    #####               #####            ##              #####                                                                                                                                *",
     "*                                        ####                                        ###                                                                                                       *",
@@ -188,12 +187,12 @@ char niveau5[18][200] = {
     "*    #####           ?        ?                                           #####      #####    g     #####         ?        ?                                                                   *",
     "*              g         g        g       T        g     T         g                           g              g       g        g       T       g                                               *",
     "* P                                      T                         T                                                                          T                                               f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau6[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                           ###############                                                                                                                                    *",
     "*                                           #             #                                                                                                                                    *",
     "*                                           #   $$$       #                                                                                                                                    *",
     "*                                           #  #####      #                                                                                                                                    *",
@@ -209,12 +208,12 @@ char niveau6[18][200] = {
     "*      ##    ?                   #                 ?                     #    ##  $$$                                                                                                          *",
     "*       #                        #        g                g       T     #     # #####     g       T                                                                                           *",
     "* P     #                                                         T            #                  T                                                                                           f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau7[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                                 $$$                                                                                                                                          *",
     "*                                                #####                                                                                                                                         *",
     "*                                                                                                                                                                                              *",
     "*                                       ####                                                                                                                                                   *",
@@ -230,12 +229,12 @@ char niveau7[18][200] = {
     "*            ######                    ####              ?        ?                                  ?         #####               T                                                            *",
     "*                                    ######        g         g          g              g       g         g              g          g                                                            *",
     "* P                                                                                                                                                                                           f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
 char niveau8[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*     ###                                         #                                                                                                                                            *",
     "*    #####                   $$$                 ###                    $$$                                                                                                                    *",
     "*               ###         #####               #####                  #####                $$$                                                                                                *",
     "*              #####                                                                       #####                                                                                               *",
@@ -251,6 +250,7 @@ char niveau8[18][200] = {
     "*    #####                                                              ######       #####    ?     #####             ?        ?                 #####                                         *",
     "*                g        g       T            g       T         g                               g                g       g        g      T                 g        T                          *",
     "* P                              T                    T                                                                                 T                           T                         f*",
+    "================================================================================================================================================================================================",
     "================================================================================================================================================================================================"
 };
 
@@ -271,7 +271,8 @@ static char niveau9[MAP_HAUTEUR][MAP_LARGEUR] = {
     "*                                                                                                      *",
     "*                                                                                                      *",
     "*    P         #########                                                                               f*",
-    "========================================================================================================"
+    "========================================================================================================",
+    "================================================================================================================================================================================================"
 };
 
 void initialiserMap(int niveau)
@@ -309,8 +310,12 @@ void initialiserMap(int niveau)
                 case '#': map[y][x] = 2; break;
                 case '$': map[y][x] = BLOC_PIECE; break;
                 case '?': map[y][x] = BLOC_QUESTION; break;
-                case 'T': map[y][x] = BLOC_TUYAU; break;
+                case '1': map[y][x] = BLOC_TUYAU_HAUT_DROITE; break;
+                case '2': map[y][x] = BLOC_TUYAU_HAUT_GAUCHE; break;
+                case '3': map[y][x] = BLOC_TUYAU_BAS_DROITE; break;
+                case '4': map[y][x] = BLOC_TUYAU_BAS_GAUCHE; break;
                 case 'f': map[y][x] = BLOC_FIN; break;
+                case 'u': map[y][x] = BLOC_INCASSABLE; break;
                 default:  map[y][x] = 0; break;
             }
         }
@@ -838,10 +843,16 @@ TexturesJeu chargerTextures(SDL_Renderer *renderer)
     textures.perso = chargerTextureBMP(renderer, "img/mario.bmp");
     textures.brique = chargerTextureBMP(renderer, "img/bloc.bmp");
     textures.piece = chargerTextureBMP(renderer, "img/piece.bmp");
-    textures.tuyau = chargerTextureBMP(renderer, "img/tuyau.bmp");
+    textures.tuyau_bas_droite = chargerTextureBMP(renderer, "img/tuyaux-bg-3.bmp");
     textures.ennemi = chargerTextureBMP(renderer, "img/ennemis.bmp");
     textures.questionBloc = chargerTextureBMP(renderer, "img/bloc-recompense.bmp");
     textures.sol = chargerTextureBMP(renderer, "img/sol.bmp");
+    textures.tuyau_bas_gauche = chargerTextureBMP(renderer, "img/tuyaux-bd-4.bmp");
+    textures.tuyau_haut_droite = chargerTextureBMP(renderer, "img/tuyaux-hg-1.bmp");
+    textures.tuyau_haut_gauche = chargerTextureBMP(renderer, "img/tuyaux-hd-2.bmp");
+    textures.bloc_incassable = chargerTextureBMP(renderer, "img/bloc-structure.bmp");
+    textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+
     
     return textures;
 }
@@ -851,9 +862,13 @@ void libererTextures(TexturesJeu textures)
     if (textures.perso) SDL_DestroyTexture(textures.perso);
     if (textures.brique) SDL_DestroyTexture(textures.brique);
     if (textures.piece) SDL_DestroyTexture(textures.piece);
-    if (textures.tuyau) SDL_DestroyTexture(textures.tuyau);
+    if (textures.tuyau_bas_droite) SDL_DestroyTexture(textures.tuyau_bas_droite);
+    if (textures.tuyau_bas_gauche) SDL_DestroyTexture(textures.tuyau_bas_gauche);
+    if (textures.tuyau_haut_droite) SDL_DestroyTexture(textures.tuyau_haut_droite);
+    if (textures.tuyau_haut_gauche) SDL_DestroyTexture(textures.tuyau_haut_gauche);
     if (textures.ennemi) SDL_DestroyTexture(textures.ennemi);
     if (textures.questionBloc) SDL_DestroyTexture(textures.questionBloc);
+    if(textures.background) SDL_DestroyTexture(textures.background);
 }
 void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
 {
@@ -877,15 +892,29 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
                 case BLOC_PIECE: // $
                     texture = textures.piece;
                     break;
-                case BLOC_TUYAU: // T
-                    texture = textures.tuyau;
+                case BLOC_TUYAU_BAS_DROITE: // T
+                    texture = textures.tuyau_bas_droite;
                     break;
+                case BLOC_TUYAU_BAS_GAUCHE: // T
+                    texture = textures.tuyau_bas_gauche;
+                    break;
+                case BLOC_TUYAU_HAUT_DROITE: // T
+                    texture = textures.tuyau_haut_droite;
+                    break;
+                case BLOC_TUYAU_HAUT_GAUCHE: 
+                    texture = textures.tuyau_haut_gauche;
+                    break;
+
                 case BLOC_QUESTION: // ?
                     texture = textures.questionBloc;
                     break;
                 case BLOC_FIN: // f
                     texture = textures.brique; // Utiliser la même texture que pour les briques
                     break;
+                case BLOC_INCASSABLE:
+                    texture = textures.bloc_incassable;
+                    break;
+                break;
                 default:
                     texture = NULL;
                     break;
@@ -1148,5 +1177,19 @@ void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police) {
     }
 
     SDL_DestroyTexture(textureTexte);
+}
+void dessinerFondRepete(SDL_Renderer *renderer, SDL_Texture *fond, int cameraX) {
+    int imageLargeur = LONGUEUR_FENETRE; // si ton fond fait 960px de large
+    int nbRepetitions = (MAP_LARGEUR * BLOC_SIZE) / imageLargeur + 2;
+
+    for (int i = 0; i < nbRepetitions; i++) {
+        SDL_Rect dest = {
+            i * imageLargeur - cameraX,
+            0,
+            imageLargeur,
+            LARGEUR_FENETRE
+        };
+        SDL_RenderCopy(renderer, fond, NULL, &dest);
+    }
 }
 

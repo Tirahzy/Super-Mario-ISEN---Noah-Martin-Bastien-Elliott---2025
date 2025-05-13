@@ -20,8 +20,9 @@ int main(int argc, char *argv[])
     SDL_Renderer *renderer = creerRenderer(fenetre);
     TexturesJeu textures = chargerTextures(renderer);
 
-    if (!textures.perso || !textures.brique || !textures.piece || !textures.tuyau ||
-        !textures.ennemi || !textures.sol || !textures.questionBloc)
+    if (!textures.perso || !textures.brique || !textures.piece || !textures.tuyau_bas_droite  ||
+        !textures.ennemi || !textures.sol || !textures.questionBloc ||
+        !textures.tuyau_bas_gauche || !textures.tuyau_haut_droite || !textures.tuyau_haut_gauche)
     {
         fprintf(stderr, "Erreur : une ou plusieurs textures sont nulles\n");
         libererTextures(textures);
@@ -170,6 +171,7 @@ int main(int argc, char *argv[])
 
                 SDL_SetRenderDrawColor(renderer, 129, 212, 255, 255);
                 SDL_RenderClear(renderer);
+                dessinerFondRepete(renderer, textures.background, cameraX);
                 dessinerMap(renderer, cameraX, textures);
                 dessinerEnnemis(renderer, cameraX, textures);
                 dessinerEffets(renderer, cameraX);

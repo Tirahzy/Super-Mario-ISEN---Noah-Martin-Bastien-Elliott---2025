@@ -26,8 +26,12 @@
 #define BLOC_PIECE 3
 #define BLOC_ENNEMI 4
 #define BLOC_QUESTION 5
-#define BLOC_TUYAU 6
+#define BLOC_TUYAU_HAUT_DROITE 6
 #define BLOC_FIN 7
+#define BLOC_TUYAU_HAUT_GAUCHE 8
+#define BLOC_TUYAU_BAS_DROITE 9
+#define BLOC_TUYAU_BAS_GAUCHE 10
+#define BLOC_INCASSABLE 11
 
 #define MAX_ENNEMIS 20
 #define ENNEMI_LARGEUR 30
@@ -75,10 +79,15 @@ typedef struct {
     SDL_Texture *perso;
     SDL_Texture *brique;
     SDL_Texture *piece;
-    SDL_Texture *tuyau;
+    SDL_Texture *tuyau_haut_droite;
+    SDL_Texture *tuyau_haut_gauche;
+    SDL_Texture *tuyau_bas_droite;
+    SDL_Texture *tuyau_bas_gauche;
     SDL_Texture *ennemi;
     SDL_Texture *questionBloc;
     SDL_Texture *sol;
+    SDL_Texture *bloc_incassable;
+    SDL_Texture *background;
 } TexturesJeu;
 
 extern Ennemi ennemis[MAX_ENNEMIS];
@@ -132,6 +141,7 @@ SDL_bool finDeNiveau(SDL_Rect joueur);
 int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nombreBoutons);
 void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
 void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
+void dessinerFondRepete(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
 
 
 #endif
