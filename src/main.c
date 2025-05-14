@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     SDL_Renderer *renderer = creerRenderer(fenetre);
     TexturesJeu textures = chargerTextures(renderer);
 
-    if (!textures.perso || !textures.brique || !textures.piece || !textures.tuyau_bas_droite  ||
+    if (!textures.perso || !textures.brique || !textures.piece || !textures.tuyau_bas_droite ||
         !textures.ennemi || !textures.sol || !textures.questionBloc ||
         !textures.tuyau_bas_gauche || !textures.tuyau_haut_droite || !textures.tuyau_haut_gauche)
     {
@@ -43,20 +43,18 @@ int main(int argc, char *argv[])
     GestionnaireFPS fps;
     initialiserFPS(&fps);
     initialiserEffets();
+    initialiserCarapaces(); // ✅ initialise carapaces
     initialiserMap(current_level);
-
     Bouton boutonsMenu[2];
     initialiserBoutons(boutonsMenu, 2);
 
     Bouton boutonsNiveauTermine[2] = {
         {{380, 200, 200, 50}, strdup("Niveau Suivant"), SDL_FALSE},
-        {{380, 270, 200, 50}, strdup("Menu Principal"), SDL_FALSE}
-    };
+        {{380, 270, 200, 50}, strdup("Menu Principal"), SDL_FALSE}};
 
     Bouton boutonsGameOver[2] = {
         {{380, 200, 200, 50}, strdup("Rejouer"), SDL_FALSE},
-        {{380, 270, 200, 50}, strdup("Menu Principal"), SDL_FALSE}
-    };
+        {{380, 270, 200, 50}, strdup("Menu Principal"), SDL_FALSE}};
 
     int etatJeu = ETAT_MENU;
 
@@ -66,208 +64,279 @@ int main(int argc, char *argv[])
 
         switch (etatJeu)
         {
-            case ETAT_MENU:
+        case ETAT_MENU:
+        {
+            int choix = gererEvenementsMenu(&continuer, boutonsMenu, 2);
+            if (choix == ETAT_JEU)
             {
-                int choix = gererEvenementsMenu(&continuer, boutonsMenu, 2);
-                if (choix == ETAT_JEU)
+                textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+                current_level = 1;
+                carre.x = 100;
+                carre.y = SOL;
+                nbPieces = 0;
+                initialiserMap(current_level);
+                initialiserCarapaces();
+                etatJeu = ETAT_JEU;
+            }
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            dessinerBoutons(renderer, boutonsMenu, 2, police);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(10);
+            break;
+        }
+
+        case ETAT_JEU:
+            gererEvenements(&continuer, &carre, &enSaut, &vitesseSaut, &touches);
+
+            SDL_Rect testCarre = carre;
+            if (touches.escape)
+            {
+                touches.escape = SDL_FALSE;
+                etatJeu = ETAT_MENU;
+                break;
+            }
+            if (touches.gauche)
+            {
+                testCarre.x -= VITESSE_DEPLACEMENT;
+                if (!detecterCollision(testCarre))
+                    carre.x = testCarre.x;
+            }
+            if (touches.droite)
+            {
+                testCarre.x += VITESSE_DEPLACEMENT;
+                if (!detecterCollision(testCarre))
+                    carre.x = testCarre.x;
+            }
+
+            if (enSaut)
+            {
+                carre.y += vitesseSaut;
+                vitesseSaut += GRAVITE;
+
+                SDL_Rect test = carre;
+                test.y += 1;
+                if (vitesseSaut > 0 && detecterCollision(test))
                 {
-                    textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
-                    current_level = 1;
-                    carre.x = 100;
-                    carre.y = SOL;
-                    nbPieces = 0;
-                    initialiserMap(current_level);
-                    etatJeu = ETAT_JEU;
+                    carre.y = ((carre.y + carre.h) / BLOC_SIZE) * BLOC_SIZE - carre.h;
+                    enSaut = SDL_FALSE;
+                    vitesseSaut = 0;
                 }
 
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderClear(renderer);
-                dessinerBoutons(renderer, boutonsMenu, 2, police);
-                SDL_RenderPresent(renderer);
-                SDL_Delay(10);
+                test = carre;
+                test.y -= 1;
+                if (vitesseSaut < 0 && detecterCollision(test))
+                {
+                    carre.y = ((carre.y) / BLOC_SIZE + 1) * BLOC_SIZE;
+                    vitesseSaut = 0;
+                }
+            }
+            else
+            {
+                SDL_Rect test = carre;
+                test.y += 1;
+                if (!detecterCollision(test))
+                {
+                    enSaut = SDL_TRUE;
+                    vitesseSaut = 0;
+                }
+                else if (touches.saut)
+                {
+                    enSaut = SDL_TRUE;
+                    vitesseSaut = FORCE_SAUT;
+                    touches.saut = SDL_FALSE;
+                }
+            }
+
+            if (enSaut && sauterSurEnnemi(carre, vitesseSaut))
+            {
+                vitesseSaut = FORCE_SAUT / 1.5f;
+            }
+            // Carapace mobile tue ou est déclenchée
+            if (interagirAvecCarapaces(&carre, &vitesseSaut))
+            {
+                scoreGameOver = nbPieces;
+                etatJeu = ETAT_GAME_OVER;
                 break;
             }
 
-            case ETAT_JEU:
-                gererEvenements(&continuer, &carre, &enSaut, &vitesseSaut, &touches);
+            carapacesTuantEnnemis();
+            mettreAJourCarapaces();
 
-                SDL_Rect testCarre = carre;
-                if (touches.gauche) {
-                    testCarre.x -= VITESSE_DEPLACEMENT;
-                    if (!detecterCollision(testCarre)) carre.x = testCarre.x;
-                }
-                if (touches.droite) {
-                    testCarre.x += VITESSE_DEPLACEMENT;
-                    if (!detecterCollision(testCarre)) carre.x = testCarre.x;
-                }
+            carapacesTuantEnnemis(); // élimine les ennemis touchés par une carapace mobile
 
-                if (enSaut)
-                {
-                    carre.y += vitesseSaut;
-                    vitesseSaut += GRAVITE;
+            mettreAJourEnnemis();
+            mettreAJourEffets();
+            interagirAvecCarapaces(&carre, &vitesseSaut);
+            mettreAJourCarapaces();
 
-                    SDL_Rect test = carre;
-                    test.y += 1;
-                    if (vitesseSaut > 0 && detecterCollision(test)) {
-                        carre.y = ((carre.y + carre.h) / BLOC_SIZE) * BLOC_SIZE - carre.h;
-                        enSaut = SDL_FALSE;
-                        vitesseSaut = 0;
-                    }
-
-                    test = carre;
-                    test.y -= 1;
-                    if (vitesseSaut < 0 && detecterCollision(test)) {
-                        carre.y = ((carre.y) / BLOC_SIZE + 1) * BLOC_SIZE;
-                        vitesseSaut = 0;
-                    }
-                }
-                else
-                {
-                    SDL_Rect test = carre;
-                    test.y += 1;
-                    if (!detecterCollision(test)) {
-                        enSaut = SDL_TRUE;
-                        vitesseSaut = 0;
-                    } else if (touches.saut) {
-                        enSaut = SDL_TRUE;
-                        vitesseSaut = FORCE_SAUT;
-                        touches.saut = SDL_FALSE;
-                    }
-                }
-
-                if (enSaut && sauterSurEnnemi(carre, vitesseSaut)) {
-                    vitesseSaut = FORCE_SAUT / 1.5f;
-                }
-
-                mettreAJourEnnemis();
-                mettreAJourEffets();
-
-                if (finDeNiveau(carre)) {
-                    scoreFinal = nbPieces;
-                    etatJeu = ETAT_NIVEAU_TERMINE;
-                    break;
-                }
-
-                if (detecterCollisionEnnemi(carre)) {
-                    scoreGameOver = nbPieces;
-                    etatJeu = ETAT_GAME_OVER;
-                }
-
-                int gauche = carre.x / BLOC_SIZE;
-                int droite = (carre.x + carre.w - 1) / BLOC_SIZE;
-                int haut = carre.y / BLOC_SIZE;
-                int bas = (carre.y + carre.h - 1) / BLOC_SIZE;
-                for (int y = haut; y <= bas; y++) {
-                    for (int x = gauche; x <= droite; x++) {
-                        if (x >= 0 && x < MAP_LARGEUR && y >= 0 && y < MAP_HAUTEUR && map[y][x] == BLOC_PIECE) {
-                            map[y][x] = 0;
-                            nbPieces++;
-                        }
-                    }
-                }
-
-                carre.x = SDL_clamp(carre.x, 0, MAP_LARGEUR * BLOC_SIZE - carre.w);
-                cameraX = carre.x + carre.w / 2 - LONGUEUR_FENETRE / 2;
-                cameraX = SDL_clamp(cameraX, 0, MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE);
-
-                SDL_SetRenderDrawColor(renderer, 129, 212, 255, 255);
-                SDL_RenderClear(renderer);
-                dessinerFondParallaxe(renderer, textures.background, cameraX);
-                dessinerMap(renderer, cameraX, textures);
-                dessinerEnnemis(renderer, cameraX, textures);
-                dessinerEffets(renderer, cameraX, textures);
-                SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
-                SDL_RenderCopy(renderer, textures.perso, NULL, &dst);
-
-                afficherScore(renderer, nbPieces, police);
-                calculerFPS(&fps);
-                afficherFPS(renderer, &fps, police);
-
-                SDL_RenderPresent(renderer);
-                break;
-
-            case ETAT_NIVEAU_TERMINE:
+            if (finDeNiveau(carre))
             {
-                touches.gauche = SDL_FALSE;
-                touches.droite = SDL_FALSE;
-                touches.saut = SDL_FALSE;
-
-                int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
-                if (current_level == NOMBRE_NIVEAUX) {
-                    afficherEcranFin(renderer, police);
-                    choix = ETAT_MENU;
-                    textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
-                    current_level = 1;
-                }
-                if (current_level == 3)
-                {
-                    current_level = 3;
-                    afficherMonde2(renderer, police);
-                    textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
-                    choix = ETAT_JEU;
-                }
-                if (current_level == 6)
-                {
-                    current_level = 6;
-                    afficherMonde3(renderer, police);
-                    textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
-                    choix = ETAT_JEU;
-                }
-                if (choix == ETAT_JEU) {
-                
-                    current_level++;
-                    carre.x = 100;
-                    carre.y = SOL;
-                    nbPieces = 0;
-                    initialiserMap(current_level);
-                    etatJeu = ETAT_JEU;
-                } else if (choix == ETAT_MENU) {
-                    etatJeu = ETAT_MENU;
-                }
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 100, 255);
-                SDL_RenderClear(renderer);
-                dessinerBoutons(renderer, boutonsNiveauTermine, 2, police);
-                SDL_RenderPresent(renderer);
-                SDL_Delay(10);
+                scoreFinal = nbPieces;
+                etatJeu = ETAT_NIVEAU_TERMINE;
                 break;
             }
 
-            case ETAT_GAME_OVER:
+            if (detecterCollisionEnnemi(carre))
             {
-                //reset des touches 
-                touches.gauche = SDL_FALSE;
-                touches.droite = SDL_FALSE;
-                touches.saut = SDL_FALSE;
-                SDL_Event event;
-                int choix = -1;
-                while (SDL_PollEvent(&event)) {
-                    if (event.type == SDL_QUIT) continuer = SDL_FALSE;
-                    else if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN) {
-                        int x = event.motion.x, y = event.motion.y;
-                        for (int i = 0; i < 2; i++) {
-                            boutonsGameOver[i].hover = pointDansRect(x, y, boutonsGameOver[i].rect);
-                            if (event.type == SDL_MOUSEBUTTONDOWN && boutonsGameOver[i].hover)
-                                choix = i;
-                        }
+                scoreGameOver = nbPieces;
+                etatJeu = ETAT_GAME_OVER;
+            }
+            if (carre.y > MAP_HAUTEUR * BLOC_SIZE)
+            {
+                scoreGameOver = nbPieces;
+                etatJeu = ETAT_GAME_OVER;
+            }
+
+            // Gestion pièces
+            int gauche = carre.x / BLOC_SIZE;
+            int droite = (carre.x + carre.w - 1) / BLOC_SIZE;
+            int haut = carre.y / BLOC_SIZE;
+            int bas = (carre.y + carre.h - 1) / BLOC_SIZE;
+            for (int y = haut; y <= bas; y++)
+            {
+                for (int x = gauche; x <= droite; x++)
+                {
+                    if (x >= 0 && x < MAP_LARGEUR && y >= 0 && y < MAP_HAUTEUR && map[y][x] == BLOC_PIECE)
+                    {
+                        map[y][x] = 0;
+                        nbPieces++;
                     }
                 }
-
-                if (choix == 0) {
-                    carre.x = 100;
-                    carre.y = SOL;
-                    nbPieces = 0;
-                    initialiserMap(current_level);
-                    etatJeu = ETAT_JEU;
-                } else if (choix == 1) etatJeu = ETAT_MENU;
-
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-                SDL_RenderClear(renderer);
-                dessinerBoutons(renderer, boutonsGameOver, 2, police);
-                SDL_RenderPresent(renderer);
-                SDL_Delay(10);
-                break;
             }
+
+            // Caméra
+            carre.x = SDL_clamp(carre.x, 0, MAP_LARGEUR * BLOC_SIZE - carre.w);
+            cameraX = carre.x + carre.w / 2 - LONGUEUR_FENETRE / 2;
+            cameraX = SDL_clamp(cameraX, 0, MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE);
+
+            // Rendu
+            SDL_SetRenderDrawColor(renderer, 129, 212, 255, 255);
+            SDL_RenderClear(renderer);
+            dessinerFondParallaxe(renderer, textures.background, cameraX);
+            dessinerMap(renderer, cameraX, textures);
+            dessinerEnnemis(renderer, cameraX, textures);
+            dessinerCarapaces(renderer, cameraX, textures); // ✅ dessiner les carapaces
+            dessinerEffets(renderer, cameraX, textures);
+            SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
+            SDL_RenderCopy(renderer, textures.perso, NULL, &dst);
+
+            afficherScore(renderer, nbPieces, police);
+            calculerFPS(&fps);
+            afficherFPS(renderer, &fps, police);
+
+            SDL_RenderPresent(renderer);
+            break;
+
+        case ETAT_NIVEAU_TERMINE:
+        {
+            touches.gauche = SDL_FALSE;
+            touches.droite = SDL_FALSE;
+            touches.saut = SDL_FALSE;
+
+            int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
+            if (current_level == NOMBRE_NIVEAUX)
+            {
+                afficherEcranFin(renderer, police);
+                choix = ETAT_MENU;
+                textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+                current_level = 1;
+            }
+            if (current_level == 3)
+            {
+                current_level = 3;
+                afficherMonde2(renderer, police);
+                textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
+                choix = ETAT_JEU;
+            }
+            if (current_level == 6)
+            {
+                current_level = 6;
+                afficherMonde3(renderer, police);
+                textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
+                choix = ETAT_JEU;
+            }
+            if (choix == ETAT_JEU)
+            {
+                current_level++;
+                carre.x = 100;
+                carre.y = SOL;
+                nbPieces = 0;
+                initialiserMap(current_level);
+                initialiserCarapaces();
+                etatJeu = ETAT_JEU;
+            }
+            else if (choix == ETAT_MENU)
+            {
+                etatJeu = ETAT_MENU;
+            }
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 100, 255);
+            SDL_RenderClear(renderer);
+            dessinerBoutons(renderer, boutonsNiveauTermine, 2, police);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(10);
+            break;
+        }
+
+        case ETAT_GAME_OVER:
+        {
+            touches.gauche = SDL_FALSE;
+            touches.droite = SDL_FALSE;
+            touches.saut = SDL_FALSE;
+            SDL_Event event;
+            int choix = -1;
+            while (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_QUIT)
+                    continuer = SDL_FALSE;
+                else if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN)
+                {
+                    int x = event.motion.x, y = event.motion.y;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        boutonsGameOver[i].hover = pointDansRect(x, y, boutonsGameOver[i].rect);
+                        if (event.type == SDL_MOUSEBUTTONDOWN && boutonsGameOver[i].hover)
+                            choix = i;
+                    }
+                }
+            }
+
+           if (choix == 0)
+{
+    carre.x = 100;
+    carre.y = SOL;
+    nbPieces = 0;
+    vitesseSaut = 0;
+    enSaut = SDL_FALSE;
+    touches.gauche = SDL_FALSE;
+    touches.droite = SDL_FALSE;
+    touches.saut = SDL_FALSE;
+
+    initialiserMap(current_level);
+    initialiserCarapaces();
+    initialiserEffets(); 
+
+    for (int i = 0; i < MAX_ENNEMIS; i++) {
+        carapaces[i].mobile = SDL_FALSE;
+        carapaces[i].direction = 0;
+        carapaces[i].tempsLancement = 0;
+    }
+
+    etatJeu = ETAT_JEU;
+}
+
+            else if (choix == 1)
+                etatJeu = ETAT_MENU;
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            dessinerBoutons(renderer, boutonsGameOver, 2, police);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(10);
+            break;
+        }
         }
 
         limiterFPS(&fps);

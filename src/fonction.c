@@ -3,7 +3,7 @@
 int map[MAP_HAUTEUR][MAP_LARGEUR];
 Ennemi ennemis[MAX_ENNEMIS];
 Effet effets[MAX_EFFETS];
-
+Carapace carapaces[MAX_ENNEMIS];
 SDL_Window *creerFenetre(char nom[])
 {
     SDL_Window *nv = SDL_CreateWindow(nom, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -61,7 +61,12 @@ void gererEvenements(SDL_bool *continuer, SDL_Rect *carre, SDL_bool *enSaut, flo
                 touches->saut = SDL_TRUE;
                 break;
             case SDLK_ESCAPE:
-                *continuer = SDL_FALSE;
+                //ouvre le menu principale
+                touches->gauche = SDL_FALSE;
+                touches->droite = SDL_FALSE;
+                touches->saut = SDL_FALSE;
+                touches->escape= 1;
+
                 break;
             }
             break;
@@ -87,24 +92,24 @@ Ennemi ennemis[MAX_ENNEMIS];
 Effet effets[MAX_EFFETS];
 
 char niveau1[18][200] = {
-    "************************************************************************************************************************************************************************************************",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                                                                                                                                                                              *",
-    "*                                       $$$                                                                                                                                                    *",
-    "*     $$                           ###       ###                   $   $          $                    $                   $$                                              $$                  *",
-    "*    ###     ##?#                 ####       ####                 ##?u?##       ####                  ##        #?      ######          ###?#                    u       ####?                 *",
-    "*                                                      uu                                                              #      #                                  uu                            *",
-    "*P                      g     k            g          uuuu                   g                           g            #        #  g                              uuu              g           f*",
-    "============================================================================================   ======================================================   ========================================",
-    "============================================================================================   ======================================================   ========================================"
+    "********************************************************************************************************************************************************************************************************",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                                                                                                                                                                                      *",
+    "*                                       $$$                                                                                                                                                            *",
+    "*     $$                           ###       ###                   $   $          $                    $                   $$                                              $$                          *",
+    "*    ###     ##?#                 ####       ####                 ##?u?##       ####                  ##        #?      ######          ###?#                    u       ####?                         *",
+    "*                                                      uu                                                              #      #                                  uu                                    *",
+    "*P       # k #          g     k            g          uuuu                   g                           g            #        #  g                              uuu              g                    f",
+    "============================================================================================   ======================================================   ================================================",
+    "============================================================================================   ======================================================   ================================================"
 };
 
 char niveau2[18][200] = {
@@ -151,23 +156,23 @@ char niveau3[18][200] = {
 
 char niveau4[18][200] = {
     "************************************************************************************************************************************************************************************************",
-    "*                                                                                                                                                                                              *",
     "*                                      ##########################################                                                                                                              *",
     "*                                      #                                        #                                                                                                              *",
-    "*                                      #        $$$              $$$            #                                                                                                              *",
-    "*                                      #       #####            #####           #                                                                                                              *",
-    "*                                      #                                        #                                                                                                              *",
-    "*                                      #                                        #       ##############                                                                                         *",
-    "*                                      #             ##     g        g          #       #            #                                                                                         *",
-    "*                                      #            ####                        #       #    $$$     #                                                                                         *",
-    "*      ###########################     ###############                     #####            ####                                                                                               *",
-    "*                                #                                                      #            #                                                                                         *",
-    "*            $$$        $$$      #                                                      #            #                                                                                         *",
-    "*      #    #####      #####     #              ?        ?       ?                     ##     g     ##                                                                                         *",
-    "*      #                         #      g             g      g       g                  #            #                                                                                         *",
-    "* P    #                                                                                #            #                                                                                        f*",
-    "================================================================================================================================================================================================",
-    "================================================================================================================================================================================================"
+    "*                                      #             $$           $$            #                                                                                                              *",
+    "*                                      #            $$$           $$$           #                                                                                                              *",
+    "*                                      #          #####          #####          #                                                                                                              *",
+    "*                                      #     ##                         ##      #      ##############                                                                                          *",
+    "*                                      ###                                  ### #      #            #                                                                                          *",
+    "*                                      #                                        #      #            #                                                                                 $$       *",
+    "*                                      #     g                                  #      #       $$   #                                                                              ####?       *",
+    "*      ############################    ###############                   ########      #      ####  #                                                                      ###?                *",
+    "*      #                          #                      ?                             #            #                                              $           $$    ##                        *",
+    "*      #     $$$        $$$       #                                ?                   #            #                                              ##          uu                              *",
+    "*      #    #####      #####      #                          ?                         ###     g    #                u      ?       ?       u                 uuuu                             *",
+    "*                                      g                    g                                                       uu                      uu               uuuuuu                            *",
+    "* P                                                                 k                                              uuu          k           uuu             uuuuuuuu g            k           f*",
+    "======================================================================================================================    ==============    ====================================================",
+    "======================================================================================================================    ==============    ====================================================="
 };
 
 char niveau5[18][200] = {
@@ -316,7 +321,6 @@ void initialiserMap(int niveau)
                 case '4': map[y][x] = BLOC_TUYAU_BAS_GAUCHE; break;
                 case 'f': map[y][x] = BLOC_FIN; break;
                 case 'u': map[y][x] = BLOC_INCASSABLE; break;
-                case 'k' : map[y][x] = 25; break;
                 default:  map[y][x] = 0; break;
             }
         }
@@ -326,32 +330,45 @@ void initialiserMap(int niveau)
 }
 
 
-void initialiserEnnemis(char niveau[][MAP_LARGEUR])
-{
-    for (int i = 0; i < MAX_ENNEMIS; i++)
-    {
+void initialiserEnnemis(char niveau[][MAP_LARGEUR]) {
+    for (int i = 0; i < MAX_ENNEMIS; i++) {
         ennemis[i].actif = SDL_FALSE;
     }
-    
+
     int nombreEnnemis = 0;
-    
-    for (int y = 0; y < MAP_HAUTEUR; y++)
-    {
-        for (int x = 0; x < MAP_LARGEUR; x++)
-        {
-            if (niveau[y][x] == 'g' && nombreEnnemis < MAX_ENNEMIS)
-            {
+
+    for (int y = 0; y < MAP_HAUTEUR; y++) {
+        for (int x = 0; x < MAP_LARGEUR; x++) {
+            if (nombreEnnemis >= MAX_ENNEMIS)
+                return;
+
+            if (niveau[y][x] == 'g') {
                 ennemis[nombreEnnemis].rect.x = x * BLOC_SIZE;
                 ennemis[nombreEnnemis].rect.y = y * BLOC_SIZE;
                 ennemis[nombreEnnemis].rect.w = ENNEMI_LARGEUR;
                 ennemis[nombreEnnemis].rect.h = ENNEMI_HAUTEUR;
                 ennemis[nombreEnnemis].vitesse = (rand() % 2) ? 2 : -2;
+                ennemis[nombreEnnemis].direction = (ennemis[nombreEnnemis].vitesse > 0) ? DROITE : GAUCHE;
+                ennemis[nombreEnnemis].type = GOOMBA;
+                ennemis[nombreEnnemis].actif = SDL_TRUE;
+                nombreEnnemis++;
+            }
+
+            if (niveau[y][x] == 'k') {
+                ennemis[nombreEnnemis].rect.x = x * BLOC_SIZE;
+                ennemis[nombreEnnemis].rect.y = y * BLOC_SIZE;
+                ennemis[nombreEnnemis].rect.w = ENNEMI_LARGEUR;
+                ennemis[nombreEnnemis].rect.h = ENNEMI_HAUTEUR;
+                ennemis[nombreEnnemis].vitesse = (rand() % 2) ? 2 : -2;
+                ennemis[nombreEnnemis].direction = GAUCHE;
+                ennemis[nombreEnnemis].type = KOOPA;
                 ennemis[nombreEnnemis].actif = SDL_TRUE;
                 nombreEnnemis++;
             }
         }
     }
 }
+
 
 void initialiserEffets()
 {
@@ -402,7 +419,21 @@ void dessinerEffets(SDL_Renderer *renderer, int cameraX, TexturesJeu textures) {
                 effets[i].rect.w,
                 effets[i].rect.h
             };
-            SDL_RenderCopy(renderer, textures.goombaMort, NULL, &dest);
+
+            // Trouver le type d'ennemi correspondant à cet effet
+            SDL_Texture *textureEffet = textures.goombaMort; // Par défaut
+            for (int j = 0; j < MAX_ENNEMIS; j++) {
+                if (ennemis[j].rect.x == effets[i].rect.x && ennemis[j].rect.y == effets[i].rect.y) {
+                    if (ennemis[j].type == KOOPA) {
+                        textureEffet = textures.carapace;
+                    } else if (ennemis[j].type == GOOMBA) {
+                        textureEffet = textures.goombaMort;
+                    }
+                    break;
+                }
+            }
+
+            SDL_RenderCopy(renderer, textureEffet, NULL, &dest);
 
             effets[i].duree--;
             if (effets[i].duree <= 0) {
@@ -527,7 +558,22 @@ SDL_bool sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
                     {
                         // Ajouter un effet d'écrasement
                         ajouterEffetEcrasement(ennemis[i].rect.x, ennemis[i].rect.y);
-                        
+
+                        if (ennemis[i].type == KOOPA)
+                        {
+                            // Placer une carapace à la position du koopa
+                            for (int j = 0; j < MAX_ENNEMIS; j++)
+                            {
+                                if (!carapaces[j].actif)
+                                {
+                                    carapaces[j].rect = ennemis[i].rect;
+                                    carapaces[j].vitesse = 0;
+                                    carapaces[j].actif = SDL_TRUE;
+                                    break;
+                                }
+                            }
+                        }
+
                         // Désactiver l'ennemi
                         ennemis[i].actif = SDL_FALSE;
                         return SDL_TRUE;
@@ -538,6 +584,25 @@ SDL_bool sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
     }
     return SDL_FALSE;
 }
+
+// Affiche les carapaces sur la map
+void dessinerCarapaces(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
+{
+    for (int i = 0; i < MAX_ENNEMIS; i++)
+    {
+        if (carapaces[i].actif)
+        {
+            SDL_Rect dst = {
+                carapaces[i].rect.x - cameraX,
+                carapaces[i].rect.y,
+                carapaces[i].rect.w,
+                carapaces[i].rect.h
+            };
+            SDL_RenderCopy(renderer, textures.carapace, NULL, &dst);
+        }
+    }
+}
+
 
 SDL_bool detecterCollisionEnnemi(SDL_Rect joueur)
 {
@@ -608,7 +673,7 @@ SDL_bool detecterCollision(SDL_Rect joueur)
             if (x < 0 || x >= MAP_LARGEUR || y < 0 || y >= MAP_HAUTEUR)
                 continue;
 
-            if (map[y][x] != 0 && map[y][x] != BLOC_PIECE && map[y][x] != BLOC_FIN)
+            if (map[y][x] != 0 && map[y][x] != BLOC_PIECE && map[y][x] != BLOC_FIN && map[y][x] != 25)
                 return SDL_TRUE;
         }
     }
@@ -856,6 +921,8 @@ TexturesJeu chargerTextures(SDL_Renderer *renderer)
     textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
     textures.goombaMort = chargerTextureBMP(renderer, "img/goomba-mort.bmp");
     textures.koompa = chargerTextureBMP(renderer, "img/tortue-1.bmp");
+    textures.carapace = chargerTextureBMP(renderer, "img/carapace-1.bmp");
+    textures.fin = chargerTextureBMP(renderer, "img/toad.bmp");
 
     
     return textures;
@@ -913,13 +980,10 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
                     texture = textures.questionBloc;
                     break;
                 case BLOC_FIN: // f
-                    texture = textures.brique; // Utiliser la même texture que pour les briques
+                    texture = textures.fin; // Utiliser la même texture que pour les briques
                     break;
                 case BLOC_INCASSABLE:
                     texture = textures.bloc_incassable;
-                    break;
-                case 25: // Koompa
-                    texture = textures.koompa;
                     break;
                 default:
                     texture = NULL;
@@ -945,11 +1009,20 @@ void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
                 ennemis[i].rect.w,
                 ennemis[i].rect.h
             };
-            SDL_RenderCopy(renderer, textures.ennemi, NULL, &dst);
+
+            SDL_Texture *texture = NULL;
+
+            if (ennemis[i].type == GOOMBA)
+                texture = textures.ennemi;
+            else if (ennemis[i].type == KOOPA)
+                texture = textures.koompa;
+
+            if (texture)
+                SDL_RenderCopy(renderer, texture, NULL, &dst);
         }
     }
 }
-// Ajoutez cette fonction à fonction.c pour vérifier si le bloc de fin est bien initialisé
+
 
 // Fonction modifiée pour ajouter des logs
 SDL_bool finDeNiveau(SDL_Rect joueur) {
@@ -1194,4 +1267,110 @@ void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cam
         dst.x += LONGUEUR_FENETRE;
     }
 }
+//
+void initialiserCarapaces()
+{
+    for (int i = 0; i < MAX_ENNEMIS; i++)
+    {
+        carapaces[i].actif = SDL_FALSE;
+    }
+}
+int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut)
+{
+    int maintenant = (int)SDL_GetTicks();
+
+    for (int i = 0; i < MAX_ENNEMIS; i++) {
+        if (!carapaces[i].actif) continue;
+
+        SDL_Rect *c = &carapaces[i].rect;
+
+        // 1. Mario saute dessus
+        int basJoueur = joueur->y + joueur->h;
+        int hautCarapace = c->y;
+        SDL_bool toucheDessus = (basJoueur >= hautCarapace - 5 && basJoueur <= hautCarapace + 10);
+
+        if (toucheDessus &&
+            joueur->x + joueur->w > c->x && joueur->x < c->x + c->w &&
+            *vitesseSaut > 0)
+        {
+            if (carapaces[i].mobile) {
+                carapaces[i].mobile = SDL_FALSE;
+                carapaces[i].vitesse = 0;
+            }
+
+            *vitesseSaut = FORCE_SAUT / 1.5f;  // ✅ rebond
+            return 0; // pas de mort
+        }
+
+        // 2. Collision latérale
+        SDL_bool collisionLaterale =
+            joueur->x + joueur->w > c->x && joueur->x < c->x + c->w &&
+            joueur->y + joueur->h > c->y && joueur->y < c->y + c->h;
+
+        if (collisionLaterale) {
+            if (!carapaces[i].mobile) {
+                // ✅ La carapace est immobile → on la lance, pas de mort
+                carapaces[i].mobile = SDL_TRUE;
+                carapaces[i].vitesse = 5;
+                carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE;
+                carapaces[i].tempsLancement = maintenant;
+            }
+            else if (maintenant - carapaces[i].tempsLancement >= 300) {
+                // ✅ Carapace mobile ET délai dépassé → mort
+                return 1;
+            }
+            // ✅ Sinon carapace vient juste d’être lancée → encore protégée
+        }
+    }
+
+    return 0;
+}
+
+
+
+void mettreAJourCarapaces()
+{
+    for (int i = 0; i < MAX_ENNEMIS; i++)
+    {
+        if (!carapaces[i].actif || !carapaces[i].mobile) continue;
+
+        carapaces[i].rect.x += carapaces[i].vitesse * carapaces[i].direction;
+
+        // Vérifie collisions murs
+        if (detecterCollision(carapaces[i].rect)) {
+            carapaces[i].direction *= -1;
+            carapaces[i].rect.x += carapaces[i].vitesse * carapaces[i].direction;
+        }
+
+        // Appliquer gravité
+        SDL_Rect testSol = carapaces[i].rect;
+        testSol.y += 5;
+        if (!detecterCollision(testSol)) {
+            carapaces[i].rect.y += 5;
+        }
+    }
+}
+void carapacesTuantEnnemis()
+{
+    int maintenant = (int)SDL_GetTicks();
+
+    for (int i = 0; i < MAX_ENNEMIS; i++) {
+        if (!carapaces[i].actif || !carapaces[i].mobile) continue;
+        if (maintenant - carapaces[i].tempsLancement < 300) continue;
+
+        SDL_Rect c = carapaces[i].rect;
+
+        for (int j = 0; j < MAX_ENNEMIS; j++) {
+            if (!ennemis[j].actif) continue;
+
+            SDL_Rect e = ennemis[j].rect;
+
+            if (SDL_HasIntersection(&c, &e)) {
+                ennemis[j].actif = SDL_FALSE;
+            }
+        }
+    }
+}
+
+
 

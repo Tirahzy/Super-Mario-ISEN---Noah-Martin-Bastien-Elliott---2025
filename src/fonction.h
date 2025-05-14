@@ -47,6 +47,28 @@
 #define FPS_CIBLE 60
 #define FRAME_TIME_MS (1000 / FPS_CIBLE)
 
+
+
+#define GOOMBA 0
+#define KOOPA 1
+#define CARAPACE 2
+#define ENNEMI_CARAPACE_IMMOBILE 1
+#define ENNEMI_CARAPACE_MOBILE 2
+
+#define GAUCHE -1
+#define DROITE 1
+typedef struct {
+    SDL_Rect rect;
+    int vitesse;
+    SDL_bool actif;
+    int type;
+    int direction;
+    SDL_bool mobile;
+    int tempsLancement; // ✅ remplacé Uint32 par int
+} Carapace;
+
+
+
 extern int map[MAP_HAUTEUR][MAP_LARGEUR];
 
 typedef struct {
@@ -61,12 +83,15 @@ typedef struct {
     SDL_bool gauche;
     SDL_bool droite;
     SDL_bool saut;
+    int escape;
 } Touches;
 
 typedef struct {
     SDL_Rect rect;
     int vitesse;
     SDL_bool actif;
+    int type;
+    int direction;
 } Ennemi;
 
 typedef struct {
@@ -91,9 +116,13 @@ typedef struct {
     SDL_Texture *background;
     SDL_Texture *goombaMort;
     SDL_Texture *koompa;
+    SDL_Texture *carapace;
+    SDL_Texture *fin;
 } TexturesJeu;
 
 extern Ennemi ennemis[MAX_ENNEMIS];
+extern Carapace carapaces[MAX_ENNEMIS];
+
 extern Effet effets[MAX_EFFETS];
 
 typedef struct {
@@ -148,5 +177,17 @@ void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
 void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police);
 void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
 
+
+
+void ajouterCarapace(int x, int y, int direction);
+void mettreAJourKoopas(SDL_Rect joueur, float vitesseSaut);
+int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut);
+void mettreAJourCarapaces(void);
+void dessinerCarapaces(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
+void initialiserKoopas(void);
+void initialiserCarapaces(void);
+void libererBoutons(Bouton boutons[], int nombreBoutons);
+// carapace qui tue un ennemi
+void carapacesTuantEnnemis();
 
 #endif
