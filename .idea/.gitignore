@@ -6,3 +6,14 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+# User-specific files
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
+#supprime les .idea et .vscode
+/.idea/
+/.vscode/
+#supprime le makefile
+/makefile
+# Node modules
