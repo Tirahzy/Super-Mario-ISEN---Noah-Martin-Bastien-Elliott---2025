@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
                 int choix = gererEvenementsMenu(&continuer, boutonsMenu, 2);
                 if (choix == ETAT_JEU)
                 {
+                    textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
                     current_level = 1;
                     carre.x = 100;
                     carre.y = SOL;
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
 
                 SDL_SetRenderDrawColor(renderer, 129, 212, 255, 255);
                 SDL_RenderClear(renderer);
-                dessinerFondRepete(renderer, textures.background, cameraX);
+                dessinerFondParallaxe(renderer, textures.background, cameraX);
                 dessinerMap(renderer, cameraX, textures);
                 dessinerEnnemis(renderer, cameraX, textures);
                 dessinerEffets(renderer, cameraX);
@@ -188,22 +189,29 @@ int main(int argc, char *argv[])
 
             case ETAT_NIVEAU_TERMINE:
             {
+                touches.gauche = SDL_FALSE;
+                touches.droite = SDL_FALSE;
+                touches.saut = SDL_FALSE;
+
                 int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
                 if (current_level == NOMBRE_NIVEAUX) {
                     afficherEcranFin(renderer, police);
                     choix = ETAT_MENU;
+                    textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
                     current_level = 1;
                 }
                 if (current_level == 3)
                 {
-                    current_level = 4;
+                    current_level = 3;
                     afficherMonde2(renderer, police);
+                    textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
                     choix = ETAT_JEU;
                 }
-                if (current_level == 5)
+                if (current_level == 6)
                 {
                     current_level = 6;
                     afficherMonde3(renderer, police);
+                    textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
                     choix = ETAT_JEU;
                 }
                 if (choix == ETAT_JEU) {
@@ -228,6 +236,10 @@ int main(int argc, char *argv[])
 
             case ETAT_GAME_OVER:
             {
+                //reset des touches 
+                touches.gauche = SDL_FALSE;
+                touches.droite = SDL_FALSE;
+                touches.saut = SDL_FALSE;
                 SDL_Event event;
                 int choix = -1;
                 while (SDL_PollEvent(&event)) {
