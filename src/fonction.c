@@ -61,7 +61,6 @@ void gererEvenements(SDL_bool *continuer, SDL_Rect *carre, SDL_bool *enSaut, flo
                 touches->saut = SDL_TRUE;
                 break;
             case SDLK_ESCAPE:
-                //ouvre le menu principale
                 touches->gauche = SDL_FALSE;
                 touches->droite = SDL_FALSE;
                 touches->saut = SDL_FALSE;
@@ -388,7 +387,7 @@ void ajouterEffetEcrasement(int x, int y)
             effets[i].rect.y = y;
             effets[i].rect.w = ENNEMI_LARGEUR;
             effets[i].rect.h = ENNEMI_HAUTEUR;
-            effets[i].duree = 30;  // Durée en frames
+            effets[i].duree = 30;  
             effets[i].actif = SDL_TRUE;
             break;
         }
@@ -420,8 +419,8 @@ void dessinerEffets(SDL_Renderer *renderer, int cameraX, TexturesJeu textures) {
                 effets[i].rect.h
             };
 
-            // Trouver le type d'ennemi correspondant à cet effet
-            SDL_Texture *textureEffet = textures.goombaMort; // Par défaut
+
+            SDL_Texture *textureEffet = textures.goombaMort;
             for (int j = 0; j < MAX_ENNEMIS; j++) {
                 if (ennemis[j].rect.x == effets[i].rect.x && ennemis[j].rect.y == effets[i].rect.y) {
                     if (ennemis[j].type == KOOPA) {
@@ -449,7 +448,6 @@ void dessinerTexture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y,
     SDL_RenderCopy(renderer, texture, NULL, &dest);
 }
 
-//perso
 
 
 
@@ -506,7 +504,6 @@ void mettreAJourEnnemis()
                 }
                 else
                 {
-                    // Déplacer l'ennemi
                     ennemis[i].rect.x += ennemis[i].vitesse;
                 }
             }
@@ -517,21 +514,21 @@ void mettreAJourEnnemis()
             
             if (!detecterCollision(testChute))
             {
-                // Appliquer la gravité
+                // Pour appliquer la gravité
                 ennemis[i].rect.y += 5;
                 
-                // Vérifier si l'ennemi est tombé au sol
+                
                 testChute = ennemis[i].rect;
                 testChute.y += 1;
                 
                 if (detecterCollision(testChute))
                 {
-                    // Ajuster la position pour être exactement au niveau du sol
+                   
                     ennemis[i].rect.y = ((ennemis[i].rect.y + ennemis[i].rect.h) / BLOC_SIZE) * BLOC_SIZE - ennemis[i].rect.h;
                 }
             }
             
-            // Vérifier si l'ennemi est sorti de la map
+            
             if (ennemis[i].rect.y > MAP_HAUTEUR * BLOC_SIZE)
             {
                 ennemis[i].actif = SDL_FALSE;
@@ -556,12 +553,12 @@ SDL_bool sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
                     if (joueur.x < ennemis[i].rect.x + ennemis[i].rect.w &&
                         joueur.x + joueur.w > ennemis[i].rect.x)
                     {
-                        // Ajouter un effet d'écrasement
+                        
                         ajouterEffetEcrasement(ennemis[i].rect.x, ennemis[i].rect.y);
 
                         if (ennemis[i].type == KOOPA)
                         {
-                            // Placer une carapace à la position du koopa
+                            
                             for (int j = 0; j < MAX_ENNEMIS; j++)
                             {
                                 if (!carapaces[j].actif)
@@ -574,7 +571,7 @@ SDL_bool sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
                             }
                         }
 
-                        // Désactiver l'ennemi
+                        
                         ennemis[i].actif = SDL_FALSE;
                         return SDL_TRUE;
                     }
@@ -585,7 +582,6 @@ SDL_bool sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
     return SDL_FALSE;
 }
 
-// Affiche les carapaces sur la map
 void dessinerCarapaces(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
 {
     for (int i = 0; i < MAX_ENNEMIS; i++)
@@ -615,13 +611,11 @@ SDL_bool detecterCollisionEnnemi(SDL_Rect joueur)
                 joueur.y < ennemis[i].rect.y + ennemis[i].rect.h &&
                 joueur.y + joueur.h > ennemis[i].rect.y)
             {
-                // Vérifier si le joueur tombe sur l'ennemi par le dessus
                 int basJoueur = joueur.y + joueur.h;
                 int hautEnnemi = ennemis[i].rect.y;
                 
                 if (basJoueur >= hautEnnemi - 5 && basJoueur <= hautEnnemi + 10)
                 {
-                    // Si le joueur touche l'ennemi par le dessus, ne pas considérer comme collision
                     continue;
                 }
                 
@@ -660,7 +654,7 @@ SDL_bool detecterCollision(SDL_Rect joueur)
     int haut = joueur.y / BLOC_SIZE;
     int bas = (joueur.y + joueur.h - 1) / BLOC_SIZE;
 
-    // Limiter les indices pour éviter les débordements de tableau
+
     if (gauche < 0) gauche = 0;
     if (droite >= MAP_LARGEUR) droite = MAP_LARGEUR - 1;
     if (haut < 0) haut = 0;
@@ -740,9 +734,8 @@ void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons
         }
         
         SDL_RenderFillRect(renderer, &boutons[i].rect);
-        
-        // Rendre le texte du bouton
-        SDL_Color couleurTexte = {255, 255, 255};  // blanc
+    
+        SDL_Color couleurTexte = {255, 255, 255};  
         SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, boutons[i].texte, couleurTexte);
         if (!surfaceTexte) {
             printf("Erreur lors du rendu du texte: %s\n", TTF_GetError());
@@ -756,7 +749,7 @@ void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons
             continue;
         }
         
-        // Centrer le texte dans le bouton
+
         SDL_Rect destTexte = {
             boutons[i].rect.x + (boutons[i].rect.w - surfaceTexte->w) / 2,
             boutons[i].rect.y + (boutons[i].rect.h - surfaceTexte->h) / 2,
@@ -814,10 +807,10 @@ int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons
                         if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
                             mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
                         {
-                            // Si c'est le bouton "Jouer"
+                            
                             if (i == 0)
                                 return ETAT_JEU;
-                            // Si c'est le bouton "Quitter"
+                            
                             else if (i == 1)
                                 *continuer = SDL_FALSE;
                         }
@@ -834,7 +827,7 @@ int gererEvenementsMenu(SDL_bool *continuer, Bouton boutons[], int nombreBoutons
         }
     }
     
-    return -1;  // Aucun état spécifique choisi
+    return -1;  
 }
 void initialiserFPS(GestionnaireFPS *fps)
 {
@@ -849,10 +842,8 @@ void limiterFPS(GestionnaireFPS *fps)
 {
     fps->frameActuelle++;
     
-    // Calculer combien de temps a pris cette frame
     unsigned int frameTicks = SDL_GetTicks() - fps->dernierTemps;
     
-    // Si la frame a été rendue trop rapidement, on attend
     if (frameTicks < FRAME_TIME_MS)
     {
         SDL_Delay(FRAME_TIME_MS - frameTicks);
@@ -865,7 +856,7 @@ void calculerFPS(GestionnaireFPS *fps)
 {
     fps->frameCount++;
     
-    // Mettre à jour le FPS toutes les secondes
+   
     unsigned int maintenant = SDL_GetTicks();
     if (maintenant - fps->dernierCalculFPS >= 1000)
     {
@@ -954,33 +945,33 @@ void dessinerMap(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
 
             switch (bloc)
             {
-                case 1: // Sol
+                case 1: 
                     texture = textures.sol;
                     break;
-                case 2: // #
+                case 2: 
                     texture = textures.brique;
                     break;
-                case BLOC_PIECE: // $
+                case BLOC_PIECE: 
                     texture = textures.piece;
                     break;
-                case BLOC_TUYAU_BAS_DROITE: // T
+                case BLOC_TUYAU_BAS_DROITE: 
                     texture = textures.tuyau_bas_droite;
                     break;
-                case BLOC_TUYAU_BAS_GAUCHE: // T
+                case BLOC_TUYAU_BAS_GAUCHE: 
                     texture = textures.tuyau_bas_gauche;
                     break;
-                case BLOC_TUYAU_HAUT_DROITE: // T
+                case BLOC_TUYAU_HAUT_DROITE: 
                     texture = textures.tuyau_haut_droite;
                     break;
                 case BLOC_TUYAU_HAUT_GAUCHE: 
                     texture = textures.tuyau_haut_gauche;
                     break;
 
-                case BLOC_QUESTION: // ?
+                case BLOC_QUESTION: 
                     texture = textures.questionBloc;
                     break;
-                case BLOC_FIN: // f
-                    texture = textures.fin; // Utiliser la même texture que pour les briques
+                case BLOC_FIN: 
+                    texture = textures.fin; 
                     break;
                 case BLOC_INCASSABLE:
                     texture = textures.bloc_incassable;
@@ -1024,29 +1015,24 @@ void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures)
 }
 
 
-// Fonction modifiée pour ajouter des logs
 SDL_bool finDeNiveau(SDL_Rect joueur) {
-    // Afficher la position du joueur
     
     int joueurGaucheBloc = joueur.x / BLOC_SIZE;
     int joueurDroiteBloc = (joueur.x + joueur.w - 1) / BLOC_SIZE;
     int joueurHautBloc = joueur.y / BLOC_SIZE;
     int joueurBasBloc = (joueur.y + joueur.h - 1) / BLOC_SIZE;
     
-    // Ajouter une marge pour vérifier les blocs adjacents
     joueurGaucheBloc = SDL_max(0, joueurGaucheBloc - 1);
     joueurDroiteBloc = SDL_min(MAP_LARGEUR - 1, joueurDroiteBloc + 1);
     joueurHautBloc = SDL_max(0, joueurHautBloc - 1);
     joueurBasBloc = SDL_min(MAP_HAUTEUR - 1, joueurBasBloc + 1);
-    
-    // Vérifier tous les blocs dans la zone
     for (int y = joueurHautBloc; y <= joueurBasBloc; y++) {
         for (int x = joueurGaucheBloc; x <= joueurDroiteBloc; x++) {
             
             if (map[y][x] == BLOC_FIN) {
 
                 
-                // Calculer les coordonnées réelles du bloc de fin
+                //Ca c'est calculer les coordonnées réelles du bloc de fin
                 SDL_Rect blocFin = {
                     x * BLOC_SIZE,
                     y * BLOC_SIZE,
@@ -1054,7 +1040,6 @@ SDL_bool finDeNiveau(SDL_Rect joueur) {
                     BLOC_SIZE
                 };
                 
-                // Vérifier si le joueur touche le bloc de fin
                 if (joueur.x < blocFin.x + blocFin.w &&
                     joueur.x + joueur.w > blocFin.x &&
                     joueur.y < blocFin.y + blocFin.h &&
@@ -1111,10 +1096,9 @@ int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nomb
                         if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
                             mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
                         {
-                            // Si c'est le bouton "Niveau Suivant"
+                            
                             if (i == 0)
                                 return ETAT_JEU;
-                            // Si c'est le bouton "Menu Principal"
                             else if (i == 1)
                                 return ETAT_MENU;
                         }
@@ -1131,7 +1115,7 @@ int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nomb
         }
     }
     
-    return -1;  // Aucun état spécifique choisi
+    return -1;  
 }
 
 void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police) {
@@ -1170,7 +1154,7 @@ void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police) {
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, textureTexte, NULL, &rectTexte);
         SDL_RenderPresent(renderer);
-        SDL_Delay(16); // ~60 FPS
+        SDL_Delay(16); 
     }
 
     SDL_DestroyTexture(textureTexte);
@@ -1211,7 +1195,7 @@ void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police) {
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, textureTexte, NULL, &rectTexte);
         SDL_RenderPresent(renderer);
-        SDL_Delay(16); // ~60 FPS
+        SDL_Delay(16); 
     }
 
     SDL_DestroyTexture(textureTexte);
@@ -1252,13 +1236,13 @@ void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police) {
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, textureTexte, NULL, &rectTexte);
         SDL_RenderPresent(renderer);
-        SDL_Delay(16); // ~60 FPS
+        SDL_Delay(16); 
     }
 
     SDL_DestroyTexture(textureTexte);
 }
 void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX) {
-    int vitesseParallaxe = 3; // Vitesse réduite pour l'effet de parallaxe
+    int vitesseParallaxe = 3; 
     int offsetX = cameraX / vitesseParallaxe;
 
     SDL_Rect dst = { -offsetX, 0, LONGUEUR_FENETRE, LARGEUR_FENETRE };
@@ -1284,7 +1268,7 @@ int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut)
 
         SDL_Rect *c = &carapaces[i].rect;
 
-        // 1. Mario saute dessus
+    
         int basJoueur = joueur->y + joueur->h;
         int hautCarapace = c->y;
         SDL_bool toucheDessus = (basJoueur >= hautCarapace - 5 && basJoueur <= hautCarapace + 10);
@@ -1298,28 +1282,26 @@ int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut)
                 carapaces[i].vitesse = 0;
             }
 
-            *vitesseSaut = FORCE_SAUT / 1.5f;  // ✅ rebond
-            return 0; // pas de mort
+            *vitesseSaut = FORCE_SAUT / 1.5f;  
+            return 0; 
         }
 
-        // 2. Collision latérale
         SDL_bool collisionLaterale =
             joueur->x + joueur->w > c->x && joueur->x < c->x + c->w &&
             joueur->y + joueur->h > c->y && joueur->y < c->y + c->h;
 
         if (collisionLaterale) {
             if (!carapaces[i].mobile) {
-                // ✅ La carapace est immobile → on la lance, pas de mort
                 carapaces[i].mobile = SDL_TRUE;
                 carapaces[i].vitesse = 5;
-                carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE;
+                carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE;//Direction dans l'autre sens de mario si t'as pas capté elliott
                 carapaces[i].tempsLancement = maintenant;
             }
             else if (maintenant - carapaces[i].tempsLancement >= 300) {
-                // ✅ Carapace mobile ET délai dépassé → mort
+
                 return 1;
             }
-            // ✅ Sinon carapace vient juste d’être lancée → encore protégée
+
         }
     }
 
@@ -1336,13 +1318,11 @@ void mettreAJourCarapaces()
 
         carapaces[i].rect.x += carapaces[i].vitesse * carapaces[i].direction;
 
-        // Vérifie collisions murs
         if (detecterCollision(carapaces[i].rect)) {
             carapaces[i].direction *= -1;
             carapaces[i].rect.x += carapaces[i].vitesse * carapaces[i].direction;
         }
 
-        // Appliquer gravité
         SDL_Rect testSol = carapaces[i].rect;
         testSol.y += 5;
         if (!detecterCollision(testSol)) {
