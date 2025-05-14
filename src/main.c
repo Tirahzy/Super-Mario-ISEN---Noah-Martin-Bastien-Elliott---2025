@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    SDL_Window *fenetre = creerFenetre("Mario Multiniveau");
+    SDL_Window *fenetre = creerFenetre("Super Mario ISEN");
     SDL_Renderer *renderer = creerRenderer(fenetre);
     TexturesJeu textures = chargerTextures(renderer);
 
@@ -175,8 +175,7 @@ int main(int argc, char *argv[])
                 dessinerFondParallaxe(renderer, textures.background, cameraX);
                 dessinerMap(renderer, cameraX, textures);
                 dessinerEnnemis(renderer, cameraX, textures);
-                dessinerEffets(renderer, cameraX);
-
+                dessinerEffets(renderer, cameraX, textures);
                 SDL_Rect dst = {carre.x - cameraX, carre.y, carre.w, carre.h};
                 SDL_RenderCopy(renderer, textures.perso, NULL, &dst);
 

@@ -75,6 +75,7 @@ typedef struct {
     SDL_bool actif;
 } Effet;
 
+
 typedef struct {
     SDL_Texture *perso;
     SDL_Texture *brique;
@@ -88,6 +89,8 @@ typedef struct {
     SDL_Texture *sol;
     SDL_Texture *bloc_incassable;
     SDL_Texture *background;
+    SDL_Texture *goombaMort;
+    SDL_Texture *koompa;
 } TexturesJeu;
 
 extern Ennemi ennemis[MAX_ENNEMIS];
@@ -121,7 +124,8 @@ void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
 void initialiserEffets();
 void ajouterEffetEcrasement(int x, int y);
 void mettreAJourEffets();
-void dessinerEffets(SDL_Renderer *renderer, int cameraX);
+void mettreAJourEnnemis();
+void dessinerEffets(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
 
 void dessinerTexture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, int cameraX);
 SDL_Texture *chargerTextureBMP(SDL_Renderer *renderer, const char *chemin);
@@ -141,6 +145,7 @@ SDL_bool finDeNiveau(SDL_Rect joueur);
 int gererEvenementsNiveauTermine(SDL_bool *continuer, Bouton boutons[], int nombreBoutons);
 void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
 void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
+void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police);
 void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
 
 
