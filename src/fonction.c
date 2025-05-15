@@ -216,12 +216,72 @@ int detecterCollision(SDL_Rect joueur)
             if (x < 0 || x >= MAP_LARGEUR || y < 0 || y >= MAP_HAUTEUR)
                 continue;
 
-            if (map[y][x] != 0 && map[y][x] != PIECE && map[y][x] != TOAD)
-                return 1;
+            int bloc = map[y][x];
+
+            // On ignore les pièces et TOAD
+            if (bloc != 0 && bloc != PIECE && bloc != TOAD)
+            {
+                // Si c'est un bloc mystère, vérifier si Mario le touche par dessous
+                if (bloc == BLOC_RECOMPENSE)
+                {
+                    int hautBloc = y * BLOC_SIZE;
+                    int basJoueur = joueur.y + joueur.h;
+
+                    // Collision par en dessous → on ne bloque pas
+                    if (basJoueur <= hautBloc + 5)
+                        continue;
+                }
+
+                return 1; // collision détectée
+            }
         }
     }
+
+    return 0; // pas de collision
+}
+
+
+
+
+//---------------------------------------------------------
+//gestion des blocs mystères
+int detecterCollisionBlocMystere(SDL_Rect joueur, float vitesseSaut) {
+    if (vitesseSaut >= 0) return 0;  // On ne vérifie que si Mario saute vers le haut
+
+    int xCentre = (joueur.x + joueur.w / 2) / BLOC_SIZE;
+    int yDessus = (joueur.y - 1) / BLOC_SIZE;
+
+    if (xCentre >= 0 && xCentre < MAP_LARGEUR && yDessus >= 0 && yDessus < MAP_HAUTEUR) {
+        if (map[yDessus][xCentre] == BLOC_RECOMPENSE) {
+            return 1;
+        }
+    }
+
     return 0;
 }
+Champignon champi = {{0, 0, BLOC_SIZE, BLOC_SIZE}, 0, 0.0f};
+
+void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float vitesseSaut)
+{
+    int xBloc = (joueur.x + joueur.w / 2) / BLOC_SIZE;
+    int yBloc = (joueur.y - 1) / BLOC_SIZE;
+
+    if (map[yBloc][xBloc] == BLOC_RECOMPENSE)
+    {
+        map[yBloc][xBloc] = BLOC_STRUCTURE;
+        champignon->x = xBloc * BLOC_SIZE;
+        champignon->y = (yBloc - 1) * BLOC_SIZE;
+    }
+}
+
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------
 // Initialisation et affichage des maps et des ennemis
@@ -1261,3 +1321,4 @@ void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cam
         dst.x += LONGUEUR_FENETRE;
     }
 }
+

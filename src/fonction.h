@@ -115,6 +115,21 @@ typedef struct
     int tempsLancement;
 } Carapace;
 
+typedef struct {
+    SDL_Rect corps;
+    int actif;
+    float vitesseY;
+} Champignon;
+
+
+
+
+typedef struct {
+    SDL_Rect corps;
+    int estGrand;
+} Mario;
+
+
 typedef struct
 {
     SDL_Rect rect;
@@ -189,5 +204,8 @@ void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police);
 void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
 
 void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
+
+int detecterCollisionBlocMystere(SDL_Rect joueur, float vitesseSaut);
+void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float vitesseSaut);
 
 #endif
