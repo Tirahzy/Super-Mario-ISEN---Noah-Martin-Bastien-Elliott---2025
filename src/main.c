@@ -1,5 +1,7 @@
 #include "fonction.h"
 
+// Commit Elliott
+
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
