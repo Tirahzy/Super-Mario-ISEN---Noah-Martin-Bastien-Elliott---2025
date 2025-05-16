@@ -52,6 +52,11 @@
 #define ETAT_JEU 1
 #define ETAT_GAME_OVER 2
 #define ETAT_NIVEAU_TERMINE 3
+#define ETAT_SELECTION 4
+
+#define NB_BOUTONS_MENU 3
+
+#define FICHIER_SAUVEGARDE "sauvegarde.dat"
 
 typedef struct
 {
@@ -117,26 +122,22 @@ typedef struct
     int tempsLancement;
 } Carapace;
 
-typedef struct {
+typedef struct
+{
     SDL_Rect corps;
     int actif;
     float vitesseY;
     float vitesseX;
-    int direction;  
+    int direction;
 } Champignon;
 
-
-
-
-
-typedef struct {
+typedef struct
+{
     SDL_Rect corps;
     int estGrand;
-    int invincible;         // 1 = invincible, 0 = normal
-    int tempsInvincible;    // temps en ms où il est devenu invincible
+    int invincible;      // 1 = invincible, 0 = normal
+    int tempsInvincible; // temps en ms où il est devenu invincible
 } Mario;
-
-
 
 typedef struct
 {
@@ -145,11 +146,17 @@ typedef struct
     int hover;
 } Bouton;
 
-typedef struct {
+typedef struct
+{
     int score;
     int vies;
     int scoreTotal;
 } ScoreJeu;
+
+typedef struct
+{
+    int niveau;
+} Sauvegarde;
 
 // Tableau de caractères pour les niveaux (fichier map.c)
 extern char niveau1[18][200];
@@ -202,7 +209,7 @@ int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut);
 void carapacesTuantEnnemis();
 void dessinerCarapaces(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
 
-void initialiserBoutons(Bouton boutons[], int nombreBoutons);
+void initialiserBoutons(Bouton boutons[], int nombreBoutons, const char *labels[]);
 void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons, TTF_Font *police);
 int pointDansRect(int x, int y, SDL_Rect rect);
 
@@ -222,5 +229,8 @@ void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float 
 
 void afficherScore(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TTF_Font *police);
 void afficherVies(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TexturesJeu textures);
+
+void sauvegarderPartie(int niveau);
+int chargerPartie(int *niveau);
 
 #endif

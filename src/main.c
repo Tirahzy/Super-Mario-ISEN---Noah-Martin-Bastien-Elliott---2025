@@ -35,6 +35,20 @@ int main(int argc, char *argv[])
     int Score = 0;
     int scoreFinal = 0;
     int current_level = 1;
+    if (chargerPartie(&current_level))
+        printf("Charge depuis sauvegarde: niveau=%d\n", current_level);
+    else
+        printf("Aucune sauvegarde, niveau 1.\n");
+
+    // Détermine et charge le bon background
+    SDL_DestroyTexture(textures.background);
+    if (current_level <= 3)
+        textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+    else if (current_level <= 6)
+        textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
+    else
+        textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
+
     int continuer = 1;
     int etatJeu = ETAT_MENU;
     ScoreJeu scoreJeu = {0, 3};
@@ -43,8 +57,13 @@ int main(int argc, char *argv[])
     initialiserCarapaces();
     initialiserEffets();
 
-    Bouton boutonsMenu[2];
-    initialiserBoutons(boutonsMenu, 2);
+    // Création des boutons
+    char *labelsMenu[NB_BOUTONS_MENU] = {
+        "Jouer",
+        "Niveau",
+        "Quitter"};
+    Bouton boutonsMenu[NB_BOUTONS_MENU];
+    initialiserBoutons(boutonsMenu, NB_BOUTONS_MENU, labelsMenu);
 
     Bouton boutonsNiveauTermine[2] = {
         {{380, 200, 200, 50}, strdup("Niveau Suivant"), 0},
@@ -60,33 +79,144 @@ int main(int argc, char *argv[])
         {
         case ETAT_MENU:
         {
-            int choix = gererEvenementsMenu(&continuer, boutonsMenu, 2);
-            mario.invincible = 0;
-            mario.tempsInvincible = 0;
-
-
-            if (choix == ETAT_JEU)
+            int choix = gererEvenementsMenu(&continuer, boutonsMenu, NB_BOUTONS_MENU);
+            if (choix >= 0)
             {
-                current_level = 1;
+                etatJeu = choix;
+
+                // Réinitialiser seulement si on a cliqué sur "Jouer"
+                if (choix == ETAT_JEU)
+                {
+                    mario.invincible = 0;
+                    mario.tempsInvincible = 0;
+
+                    if (!chargerPartie(&current_level))
+                    {
+                        current_level = 1; // aucune sauvegarde trouvée
+                    }
+
+                    mario.corps.x = startX;
+                    mario.corps.y = startY;
+                    mario.estGrand = 0;
+                    mario.corps.h = BLOC_SIZE;
+                    champi.actif = 0;
+                    champi.vitesseY = 0;
+                    champi.corps.x = 0;
+                    champi.corps.y = 0;
+                    scoreJeu.vies = 3;
+
+                    initialiserMap(current_level);
+                    initialiserCarapaces();
+                    initialiserEffets();
+
+                    SDL_DestroyTexture(textures.background);
+                    if (current_level <= 3)
+                        textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+                    else if (current_level <= 6)
+                        textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
+                    else
+                        textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
+                }
+            }
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            dessinerBoutons(renderer, boutonsMenu, NB_BOUTONS_MENU, police);
+            SDL_RenderPresent(renderer);
+            SDL_Delay(16);
+            break;
+        }
+
+        case ETAT_SELECTION:
+        {
+            static const char *labelsNiv[NOMBRE_NIVEAUX] = {
+                "Niveau 1", "Niveau 2", "Niveau 3",
+                "Niveau 4", "Niveau 5", "Niveau 6",
+                "Niveau 7", "Niveau 8", "Niveau 9"};
+
+            Bouton boutonsSelect[NOMBRE_NIVEAUX];
+            int largeur = 180, hauteur = 50, espacement = 20;
+            int debutX = (LONGUEUR_FENETRE - (3 * largeur + 2 * espacement)) / 2;
+            int debutY = 100;
+
+            for (int i = 0; i < NOMBRE_NIVEAUX; i++)
+            {
+                boutonsSelect[i].rect.x = debutX + (i % 3) * (largeur + espacement);
+                boutonsSelect[i].rect.y = debutY + (i / 3) * (hauteur + 50);
+                boutonsSelect[i].rect.w = largeur;
+                boutonsSelect[i].rect.h = hauteur;
+                boutonsSelect[i].texte = labelsNiv[i];
+                boutonsSelect[i].hover = 0;
+            }
+
+            int choixNiv = -1;
+            SDL_Event ev;
+            while (choixNiv < 0 && continuer)
+            {
+                while (SDL_PollEvent(&ev))
+                {
+                    if (ev.type == SDL_QUIT)
+                        continuer = 0;
+                    else if (ev.type == SDL_MOUSEMOTION)
+                    {
+                        int mx = ev.motion.x, my = ev.motion.y;
+                        for (int i = 0; i < NOMBRE_NIVEAUX; i++)
+                            boutonsSelect[i].hover = pointDansRect(mx, my, boutonsSelect[i].rect);
+                    }
+                    else if (ev.type == SDL_MOUSEBUTTONDOWN && ev.button.button == SDL_BUTTON_LEFT)
+                    {
+                        int mx = ev.button.x, my = ev.button.y;
+                        for (int i = 0; i < NOMBRE_NIVEAUX; i++)
+                        {
+                            if (pointDansRect(mx, my, boutonsSelect[i].rect))
+                            {
+                                choixNiv = i + 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_RenderClear(renderer);
+
+                // Texte Monde
+                SDL_Color couleur = {255, 255, 255};
+                for (int ligne = 0; ligne < 3; ligne++)
+                {
+                    char texteMonde[32];
+                    sprintf(texteMonde, "Monde %d :", ligne + 1);
+                    SDL_Surface *surface = TTF_RenderText_Solid(police, texteMonde, couleur);
+                    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+                    SDL_Rect pos = {debutX - 150, debutY + ligne * (hauteur + 50) + 10, surface->w, surface->h};
+                    SDL_RenderCopy(renderer, texture, NULL, &pos);
+                    SDL_FreeSurface(surface);
+                    SDL_DestroyTexture(texture);
+                }
+
+                dessinerBoutons(renderer, boutonsSelect, NOMBRE_NIVEAUX, police);
+                SDL_RenderPresent(renderer);
+                SDL_Delay(16);
+            }
+
+            if (choixNiv > 0)
+            {
+                current_level = choixNiv;
                 mario.corps.x = startX;
                 mario.corps.y = startY;
-                mario.estGrand = 0;
-                mario.corps.h = BLOC_SIZE;
-                champi.actif = 0;
-                champi.vitesseY = 0;
-                champi.corps.x = 0;
-                champi.corps.y = 0;
-                scoreJeu.vies = 3;
+                scoreJeu.score = 0;
+                SDL_DestroyTexture(textures.background);
+                if (current_level <= 3)
+                    textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+                else if (current_level <= 6)
+                    textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
+                else
+                    textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
                 initialiserMap(current_level);
                 initialiserCarapaces();
                 initialiserEffets();
                 etatJeu = ETAT_JEU;
             }
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderClear(renderer);
-            dessinerBoutons(renderer, boutonsMenu, 2, police);
-            SDL_RenderPresent(renderer);
-            SDL_Delay(16);
             break;
         }
 
@@ -176,7 +306,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (enSaut && sauterSurEnnemi(mario.corps, vitesseSaut,&scoreJeu))
+            if (enSaut && sauterSurEnnemi(mario.corps, vitesseSaut, &scoreJeu))
                 vitesseSaut = FORCE_SAUT / 1.5f;
 
             if (!mario.invincible && interagirAvecCarapaces(&mario.corps, &vitesseSaut))
@@ -206,12 +336,15 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                   scoreJeu.vies--;
-                    if (scoreJeu.vies <= 0) {
+                    scoreJeu.vies--;
+                    if (scoreJeu.vies <= 0)
+                    {
                         scoreFinal = scoreJeu.score;
                         etatJeu = ETAT_GAME_OVER;
                         break;
-                    } else {
+                    }
+                    else
+                    {
                         // Réinitialisation du niveau sans perdre le score
                         mario.corps.x = startX;
                         mario.corps.y = startY;
@@ -223,8 +356,8 @@ int main(int argc, char *argv[])
                         initialiserEffets();
                         cameraX = 0;
                         break;
+                    }
                 }
-            }
             }
 
             carapacesTuantEnnemis();
@@ -266,25 +399,28 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                     scoreJeu.vies--;
-                    if (scoreJeu.vies <= 0) {
+                    scoreJeu.vies--;
+                    if (scoreJeu.vies <= 0)
+                    {
                         scoreFinal = scoreJeu.score;
                         etatJeu = ETAT_GAME_OVER;
                         break;
-                    } else {
+                    }
+                    else
+                    {
                         // Réinitialisation du niveau sans perdre le score
                         mario.corps.x = startX;
                         mario.corps.y = startY;
                         enSaut = 0;
                         vitesseSaut = 0;
                         touches.gauche = touches.droite = touches.saut = 0;
-                        initialiserMap(current_level);  // Recharger le niveau actuel
+                        initialiserMap(current_level); // Recharger le niveau actuel
                         initialiserCarapaces();
                         initialiserEffets();
                         cameraX = 0;
                         break;
+                    }
                 }
-            }
             }
 
             int gauche = mario.corps.x / BLOC_SIZE;
@@ -322,7 +458,7 @@ int main(int argc, char *argv[])
                 {
                     champi.vitesseY = 0;
                     // Ajuste pile sur le bloc, sans le repousser violemment car sinon rebond
-                champi.corps.y = (champi.corps.y + BLOC_SIZE) / BLOC_SIZE * BLOC_SIZE - champi.corps.h;
+                    champi.corps.y = (champi.corps.y + BLOC_SIZE) / BLOC_SIZE * BLOC_SIZE - champi.corps.h;
                 }
 
                 // DÉPLACEMENT HORIZONTAL
@@ -372,7 +508,7 @@ int main(int argc, char *argv[])
             }
 
             afficherScore(renderer, &scoreJeu, police);
-            afficherVies(renderer, &scoreJeu, textures); 
+            afficherVies(renderer, &scoreJeu, textures);
             SDL_RenderPresent(renderer);
             SDL_Delay(16);
             break;
@@ -382,7 +518,6 @@ int main(int argc, char *argv[])
         {
             touches.gauche = touches.droite = touches.saut = 0;
             int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
-            printf("choix = %d\n", choix);
 
             if (current_level == NOMBRE_NIVEAUX)
             {
@@ -395,7 +530,7 @@ int main(int argc, char *argv[])
             {
                 afficherMonde2(renderer, police);
                 // mettre un delai de 3 secondes
-                SDL_Delay(3000);
+                SDL_Delay(2000);
                 textures.background = chargerTextureBMP(renderer, "img/fond2.bmp");
                 choix = ETAT_JEU;
             }
@@ -403,7 +538,7 @@ int main(int argc, char *argv[])
             {
                 afficherMonde3(renderer, police);
                 // mettre un delai de 3 secondes
-                SDL_Delay(3000);
+                SDL_Delay(2000);
                 textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
                 choix = ETAT_JEU;
             }
@@ -416,6 +551,7 @@ int main(int argc, char *argv[])
                 mario.corps
                     .y = startY;
                 scoreJeu.vies = 3;
+                sauvegarderPartie(current_level);
                 initialiserMap(current_level);
                 initialiserCarapaces();
                 initialiserEffets();
@@ -495,14 +631,17 @@ int main(int argc, char *argv[])
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
-            dessinerBoutons(renderer, boutonsGameOver, 2, police);
+            dessinerBoutons(renderer, boutonsGameOver, NB_BOUTONS_MENU, police);
             SDL_RenderPresent(renderer);
             SDL_Delay(16);
             break;
         }
         }
     }
-    
+
+    // Sauvegarde avant de quitter
+    if (etatJeu == ETAT_JEU || etatJeu == ETAT_NIVEAU_TERMINE)
+        sauvegarderPartie(current_level);
 
     free(boutonsNiveauTermine[0].texte);
     free(boutonsNiveauTermine[1].texte);

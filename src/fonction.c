@@ -243,19 +243,20 @@ int detecterCollision(SDL_Rect joueur)
     return 0; // pas de collision
 }
 
-
-
-
 //---------------------------------------------------------
-//gestion des blocs mystères
-int detecterCollisionBlocMystere(SDL_Rect joueur, float vitesseSaut) {
-    if (vitesseSaut >= 0) return 0;  // On ne vérifie que si Mario saute vers le haut
+// gestion des blocs mystères
+int detecterCollisionBlocMystere(SDL_Rect joueur, float vitesseSaut)
+{
+    if (vitesseSaut >= 0)
+        return 0; // On ne vérifie que si Mario saute vers le haut
 
     int xCentre = (joueur.x + joueur.w / 2) / BLOC_SIZE;
     int yDessus = (joueur.y - 1) / BLOC_SIZE;
 
-    if (xCentre >= 0 && xCentre < MAP_LARGEUR && yDessus >= 0 && yDessus < MAP_HAUTEUR) {
-        if (map[yDessus][xCentre] == BLOC_RECOMPENSE) {
+    if (xCentre >= 0 && xCentre < MAP_LARGEUR && yDessus >= 0 && yDessus < MAP_HAUTEUR)
+    {
+        if (map[yDessus][xCentre] == BLOC_RECOMPENSE)
+        {
             return 1;
         }
     }
@@ -276,15 +277,6 @@ void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float 
         champignon->y = (yBloc - 1) * BLOC_SIZE;
     }
 }
-
-
-
-
-
-
-
-
-
 
 //---------------------------------------------------------
 // Initialisation et affichage des maps et des ennemis
@@ -633,14 +625,14 @@ int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut, ScoreJeu *scoreData)
             {
                 int basJoueur = joueur.y + joueur.h;
                 int hautEnnemi = ennemis[i].rect.y;
-                
+
                 if (basJoueur >= hautEnnemi - 5 && basJoueur <= hautEnnemi + 10)
                 {
                     if (joueur.x < ennemis[i].rect.x + ennemis[i].rect.w &&
                         joueur.x + joueur.w > ennemis[i].rect.x)
                     {
                         ajouterEffetEcrasement(ennemis[i].rect.x, ennemis[i].rect.y);
-                        
+
                         if (ennemis[i].type == KOOPA)
                         {
                             for (int j = 0; j < MAX_ENNEMIS; j++)
@@ -654,13 +646,13 @@ int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut, ScoreJeu *scoreData)
                                 }
                             }
                         }
-                        
+
                         // Il gagne 400 points
                         // et un bonus de 100 points par ennemi tué dans les 5 secondes
                         scoreData->score += 400;
-                        
+
                         // Afficher l'effet de points (optionnel si vous avez cette fonction)
-                        
+
                         ennemis[i].actif = 0;
                         return 1;
                     }
@@ -776,7 +768,6 @@ void initialiserCarapaces()
     }
 }
 
-
 void mettreAJourCarapaces()
 {
     for (int i = 0; i < MAX_ENNEMIS; i++)
@@ -841,25 +832,24 @@ int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut)
             joueur->y + joueur->h > c->y && joueur->y < c->y + c->h;
 
         if (collisionLaterale)
-{
-    if (!carapaces[i].mobile)
-    {
-        // On l’active (Mario l’a tapée en marchant dessus)
-        carapaces[i].mobile = 1;
-        carapaces[i].vitesse = 6;
-        carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE;
-        carapaces[i].tempsLancement = maintenant;
-    }
-    else
-    {
-        //Ne tuer Mario que si la carapace est mobile depuis plus de 200 ms
-        if (carapaces[i].mobile && maintenant - carapaces[i].tempsLancement >= 200)
         {
-            return 1;
+            if (!carapaces[i].mobile)
+            {
+                // On l’active (Mario l’a tapée en marchant dessus)
+                carapaces[i].mobile = 1;
+                carapaces[i].vitesse = 6;
+                carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE;
+                carapaces[i].tempsLancement = maintenant;
+            }
+            else
+            {
+                // Ne tuer Mario que si la carapace est mobile depuis plus de 200 ms
+                if (carapaces[i].mobile && maintenant - carapaces[i].tempsLancement >= 200)
+                {
+                    return 1;
+                }
+            }
         }
-    }
-}
-
     }
 
     return 0;
@@ -917,7 +907,6 @@ void afficherScore(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TTF_Font *police)
     char texte[64];
     sprintf(texte, "Score : %d", scoreJeu->score);
 
-
     SDL_Color couleur = {255, 255, 255};
     SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, texte, couleur);
     if (!surfaceTexte)
@@ -964,14 +953,12 @@ void afficherVies(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TexturesJeu textur
 //---------------------------------------------------------
 // Boutons pour Menu
 
-void initialiserBoutons(Bouton boutons[], int nombreBoutons)
+void initialiserBoutons(Bouton boutons[], int nombreBoutons, const char *labels[])
 {
     int largeur = 200;
     int hauteur = 50;
     int espacement = 20;
     int debutY = (LARGEUR_FENETRE - (nombreBoutons * hauteur + (nombreBoutons - 1) * espacement)) / 2;
-
-    char *textes[] = {"Jouer", "Quitter"};
 
     for (int i = 0; i < nombreBoutons; i++)
     {
@@ -979,7 +966,7 @@ void initialiserBoutons(Bouton boutons[], int nombreBoutons)
         boutons[i].rect.y = debutY + i * (hauteur + espacement);
         boutons[i].rect.w = largeur;
         boutons[i].rect.h = hauteur;
-        boutons[i].texte = textes[i];
+        boutons[i].texte = labels[i]; // on pointe sur la chaÃ®ne constante
         boutons[i].hover = 0;
     }
 }
@@ -1039,7 +1026,6 @@ int pointDansRect(int x, int y, SDL_Rect rect)
 int gererEvenementsMenu(int *continuer, Bouton boutons[], int nombreBoutons)
 {
     SDL_Event event;
-
     while (SDL_PollEvent(&event))
     {
         switch (event.type)
@@ -1050,40 +1036,25 @@ int gererEvenementsMenu(int *continuer, Bouton boutons[], int nombreBoutons)
 
         case SDL_MOUSEMOTION:
         {
-            int mouseX = event.motion.x;
-            int mouseY = event.motion.y;
-
+            int mx = event.motion.x, my = event.motion.y;
             for (int i = 0; i < nombreBoutons; i++)
-            {
-                if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
-                    mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
-                {
-                    boutons[i].hover = 1;
-                }
-                else
-                {
-                    boutons[i].hover = 0;
-                }
-            }
+                boutons[i].hover = pointDansRect(mx, my, boutons[i].rect);
         }
         break;
 
         case SDL_MOUSEBUTTONDOWN:
             if (event.button.button == SDL_BUTTON_LEFT)
             {
-                int mouseX = event.button.x;
-                int mouseY = event.button.y;
-
+                int mx = event.button.x, my = event.button.y;
                 for (int i = 0; i < nombreBoutons; i++)
                 {
-                    if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
-                        mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
+                    if (pointDansRect(mx, my, boutons[i].rect))
                     {
-
                         if (i == 0)
                             return ETAT_JEU;
-
                         else if (i == 1)
+                            return ETAT_SELECTION;
+                        else if (i == 2)
                             *continuer = 0;
                     }
                 }
@@ -1092,13 +1063,10 @@ int gererEvenementsMenu(int *continuer, Bouton boutons[], int nombreBoutons)
 
         case SDL_KEYDOWN:
             if (event.key.keysym.sym == SDLK_ESCAPE)
-            {
                 *continuer = 0;
-            }
             break;
         }
     }
-
     return -1;
 }
 
@@ -1363,3 +1331,32 @@ void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cam
     }
 }
 
+//---------------------------------------------------------
+// Fonction de sauvegarde de la partie
+void sauvegarderPartie(int niveau)
+{
+    FILE *fichier = fopen(FICHIER_SAUVEGARDE, "wb");
+    if (!fichier)
+        return;
+
+    Sauvegarde sauvegarde = {niveau};
+    fwrite(&sauvegarde, sizeof(Sauvegarde), 1, fichier);
+    fclose(fichier);
+}
+
+int chargerPartie(int *niveau)
+{
+    FILE *fichier = fopen(FICHIER_SAUVEGARDE, "rb");
+    if (!fichier)
+        return 0;
+
+    Sauvegarde sauvegarde;
+    size_t lu = fread(&sauvegarde, sizeof(Sauvegarde), 1, fichier);
+    fclose(fichier);
+
+    if (lu != 1)
+        return 0;
+
+    *niveau = sauvegarde.niveau;
+    return 1;
+}
