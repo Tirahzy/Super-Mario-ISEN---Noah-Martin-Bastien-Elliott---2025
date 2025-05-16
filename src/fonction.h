@@ -148,6 +148,7 @@ typedef struct
 typedef struct {
     int score;
     int vies;
+    int scoreTotal;
 } ScoreJeu;
 
 // Tableau de caractères pour les niveaux (fichier map.c)

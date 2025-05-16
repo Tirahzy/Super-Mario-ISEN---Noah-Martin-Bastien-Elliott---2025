@@ -76,8 +76,6 @@ int main(int argc, char *argv[])
                 champi.vitesseY = 0;
                 champi.corps.x = 0;
                 champi.corps.y = 0;
-                
-                scoreJeu.score = 0;
                 scoreJeu.vies = 3;
                 initialiserMap(current_level);
                 initialiserCarapaces();
@@ -417,7 +415,6 @@ int main(int argc, char *argv[])
                     .x = startX;
                 mario.corps
                     .y = startY;
-                scoreJeu.score= 0;
                 scoreJeu.vies = 3;
                 initialiserMap(current_level);
                 initialiserCarapaces();
@@ -469,6 +466,8 @@ int main(int argc, char *argv[])
 
             if (choix == 0)
             {
+                current_level = 1;
+                textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
                 mario.corps
                     .x = startX;
                 mario.corps
