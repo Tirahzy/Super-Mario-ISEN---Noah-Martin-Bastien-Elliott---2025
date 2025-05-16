@@ -1172,6 +1172,72 @@ int gererEvenementsNiveauTermine(int *continuer, Bouton boutons[], int nombreBou
     return -1;
 }
 
+int gererGameOver(int *continuer, Bouton boutons[], int nombreBoutons)
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+        case SDL_QUIT:
+            *continuer = 0;
+            break;
+
+        case SDL_MOUSEMOTION:
+        {
+            int mouseX = event.motion.x;
+            int mouseY = event.motion.y;
+
+            for (int i = 0; i < nombreBoutons; i++)
+            {
+                if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
+                    mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
+                {
+                    boutons[i].hover = 1;
+                }
+                else
+                {
+                    boutons[i].hover = 0;
+                }
+            }
+        }
+        break;
+
+        case SDL_MOUSEBUTTONDOWN:
+            if (event.button.button == SDL_BUTTON_LEFT)
+            {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+
+                for (int i = 0; i < nombreBoutons; i++)
+                {
+                    if (mouseX >= boutons[i].rect.x && mouseX <= boutons[i].rect.x + boutons[i].rect.w &&
+                        mouseY >= boutons[i].rect.y && mouseY <= boutons[i].rect.y + boutons[i].rect.h)
+                    {
+
+                        if (i == 0)
+                            return ETAT_JEU;
+                        else if (i == 1)
+                            return ETAT_MENU;
+                    }
+                }
+            }
+            break;
+
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE)
+            {
+                return ETAT_MENU;
+            }
+            break;
+        }
+    }
+
+    return -1;
+}
+
+
 //---------------------------------------------------------
 // Affichage des transitions entre les mondes
 
@@ -1314,6 +1380,7 @@ void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police)
 
     SDL_DestroyTexture(textureTexte);
 }
+
 
 //---------------------------------------------------------
 // Affichage background

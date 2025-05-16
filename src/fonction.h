@@ -222,6 +222,8 @@ void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
 void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police);
 void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
 
+int gererGameOver(int *continuer, Bouton boutons[], int nombreBoutons);
+
 void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
 
 int detecterCollisionBlocMystere(SDL_Rect joueur, float vitesseSaut);

@@ -580,6 +580,7 @@ int main(int argc, char *argv[])
             champi.corps.y = 0;
 
             touches.gauche = touches.droite = touches.saut = 0;
+
             SDL_Event event;
             int choix = -1;
 
@@ -631,7 +632,7 @@ int main(int argc, char *argv[])
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
-            dessinerBoutons(renderer, boutonsGameOver, NB_BOUTONS_MENU, police);
+            dessinerBoutons(renderer, boutonsGameOver, 2, police);
             SDL_RenderPresent(renderer);
             SDL_Delay(16);
             break;
