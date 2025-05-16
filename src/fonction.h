@@ -119,7 +119,10 @@ typedef struct {
     SDL_Rect corps;
     int actif;
     float vitesseY;
+    float vitesseX;
+    int direction;  
 } Champignon;
+
 
 
 
@@ -127,7 +130,10 @@ typedef struct {
 typedef struct {
     SDL_Rect corps;
     int estGrand;
+    int invincible;         // 1 = invincible, 0 = normal
+    int tempsInvincible;    // temps en ms où il est devenu invincible
 } Mario;
+
 
 
 typedef struct

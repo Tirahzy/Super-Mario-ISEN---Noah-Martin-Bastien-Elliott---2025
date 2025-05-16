@@ -60,6 +60,9 @@ int main(int argc, char *argv[])
         case ETAT_MENU:
         {
             int choix = gererEvenementsMenu(&continuer, boutonsMenu, 2);
+            mario.invincible = 0;
+            mario.tempsInvincible = 0;
+
             if (choix == ETAT_JEU)
             {
                 current_level = 1;
@@ -67,6 +70,11 @@ int main(int argc, char *argv[])
                 mario.corps.y = startY;
                 mario.estGrand = 0;
                 mario.corps.h = BLOC_SIZE;
+                champi.actif = 0;
+                champi.vitesseY = 0;
+                champi.corps.x = 0;
+                champi.corps.y = 0;
+
                 nbPieces = 0;
                 initialiserMap(current_level);
                 initialiserCarapaces();
@@ -126,8 +134,11 @@ int main(int argc, char *argv[])
                         if (!mario.estGrand)
                         {
                             champi.corps.x = xBloc * BLOC_SIZE;
-                            champi.corps.y = (yBloc - 1) * BLOC_SIZE;
+                            champi.corps.y = (yBloc - 1) * BLOC_SIZE - 5; // anti-glitch
+
                             champi.vitesseY = -2;
+                            champi.vitesseX = 3.5f; // ou 2.0f pour + rapide
+                            champi.direction = 1;   // droite par défaut
                             champi.actif = 1;
                         }
                         else
@@ -167,25 +178,75 @@ int main(int argc, char *argv[])
             if (enSaut && sauterSurEnnemi(mario.corps, vitesseSaut))
                 vitesseSaut = FORCE_SAUT / 1.5f;
 
-            if (interagirAvecCarapaces(&mario.corps, &vitesseSaut))
+            if (!mario.invincible && interagirAvecCarapaces(&mario.corps, &vitesseSaut))
             {
-                scoreFinal = nbPieces;
-                etatJeu = ETAT_GAME_OVER;
-                break;
+                if (mario.estGrand)
+                {
+                    // Simule le corps réduit
+                    SDL_Rect futurCorps = mario.corps;
+                    futurCorps.h = BLOC_SIZE;
+                    futurCorps.y += (mario.corps.h - BLOC_SIZE);
+
+                    // Check si y'a de la place
+                    if (!detecterCollision(futurCorps))
+                    {
+                        mario.corps = futurCorps;
+                    }
+                    else
+                    {
+                        // Pas de place → on pousse encore plus (juste en dessous)
+                        mario.corps.y += BLOC_SIZE;
+                        mario.corps.h = BLOC_SIZE;
+                    }
+
+                    mario.estGrand = 0;
+                    mario.invincible = 1;
+                    mario.tempsInvincible = SDL_GetTicks();
+                }
+                else
+                {
+                    scoreFinal = nbPieces;
+                    etatJeu = ETAT_GAME_OVER;
+                    break;
+                }
             }
 
             carapacesTuantEnnemis();
             mettreAJourCarapaces();
             mettreAJourEnnemis();
             mettreAJourEffets();
+            // Gérer l'invincibilité
+            if (mario.invincible)
+            {
+                if (SDL_GetTicks() - mario.tempsInvincible >= 1000)
+                {
+                    mario.invincible = 0;
+                }
+            }
 
-            if (detecterCollisionEnnemi(mario.corps) || mario.corps.y > MAP_HAUTEUR * BLOC_SIZE)
+            if (!mario.invincible && (detecterCollisionEnnemi(mario.corps) || mario.corps.y > MAP_HAUTEUR * BLOC_SIZE))
             {
                 if (mario.estGrand)
                 {
+                    // Préparer futur corps de Mario petit
+                    SDL_Rect futurCorps = mario.corps;
+                    futurCorps.h = BLOC_SIZE;
+                    futurCorps.y += (mario.corps.h - BLOC_SIZE); // décale vers le bas
+
+                    if (!detecterCollision(futurCorps))
+                    {
+                        mario.corps = futurCorps;
+                    }
+                    else
+                    {
+                        // y'a un bloc en dessous, on pousse encore plus pour pas se bloquer
+                        mario.corps.y += BLOC_SIZE;
+                        mario.corps.h = BLOC_SIZE;
+                    }
+
                     mario.estGrand = 0;
-                    mario.corps.h = BLOC_SIZE;
-                    mario.corps.y += BLOC_SIZE;
+                    mario.invincible = 1;
+                    mario.tempsInvincible = SDL_GetTicks();
                 }
                 else
                 {
@@ -217,16 +278,39 @@ int main(int argc, char *argv[])
 
             if (champi.actif)
             {
+                // GRAVITÉ
                 champi.vitesseY += GRAVITE;
-                champi.corps.y += (int)champi.vitesseY;
+                SDL_Rect testY = champi.corps;
+                testY.y += (int)champi.vitesseY;
 
-                SDL_Rect testCh = champi.corps;
-                testCh.y += 1;
-                if (detecterCollision(testCh)) champi.vitesseY = 0;
+                if (!detecterCollision(testY))
+                {
+                    champi.corps.y = testY.y;
+                }
+                else
+                {
+                    champi.vitesseY = 0;
+                    // Ajuste pile sur le bloc, sans le repousser violemment car sinon rebond
+    champi.corps.y = (champi.corps.y + BLOC_SIZE) / BLOC_SIZE * BLOC_SIZE - champi.corps.h;
+                }
 
-                if (SDL_HasIntersection(&champi.corps, &mario.corps)) {
+                // DÉPLACEMENT HORIZONTAL
+                SDL_Rect testX = champi.corps;
+                testX.x += champi.vitesseX * champi.direction;
+
+                if (!detecterCollision(testX))
+                {
+                    champi.corps.x = testX.x;
+                }
+                else
+                {
+                    champi.direction *= -1;
+                }
+                if (SDL_HasIntersection(&champi.corps, &mario.corps))
+                {
                     champi.actif = 0;
-                    if (!mario.estGrand) {
+                    if (!mario.estGrand)
+                    {
                         mario.estGrand = 1;
                         mario.corps.h = BLOC_SIZE * 1.75;
                         mario.corps.y -= BLOC_SIZE;
@@ -234,6 +318,7 @@ int main(int argc, char *argv[])
                 }
             }
 
+            // sdl_clamp sert à limiter la valeur de cameraX entre 0 et MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE
             mario.corps.x = SDL_clamp(mario.corps.x, 0, MAP_LARGEUR * BLOC_SIZE - mario.corps.w);
             cameraX = mario.corps.x + mario.corps.w / 2 - LONGUEUR_FENETRE / 2;
             cameraX = SDL_clamp(cameraX, 0, MAP_LARGEUR * BLOC_SIZE - LONGUEUR_FENETRE);
@@ -249,7 +334,8 @@ int main(int argc, char *argv[])
             SDL_Rect dst = {mario.corps.x - cameraX, mario.corps.y, mario.corps.w, mario.corps.h};
             SDL_RenderCopy(renderer, mario.estGrand ? textures.marioBig : textures.mario, NULL, &dst);
 
-            if (champi.actif) {
+            if (champi.actif)
+            {
                 SDL_Rect dstCh = {champi.corps.x - cameraX, champi.corps.y, champi.corps.w, champi.corps.h};
                 SDL_RenderCopy(renderer, textures.champignon, NULL, &dstCh);
             }
@@ -260,7 +346,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-       case ETAT_NIVEAU_TERMINE:
+        case ETAT_NIVEAU_TERMINE:
         {
             touches.gauche = touches.droite = touches.saut = 0;
             int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
@@ -317,6 +403,13 @@ int main(int argc, char *argv[])
 
         case ETAT_GAME_OVER:
         {
+            mario.invincible = 0;
+            mario.tempsInvincible = 0;
+            champi.actif = 0;
+            champi.vitesseY = 0;
+            champi.corps.x = 0;
+            champi.corps.y = 0;
+
             touches.gauche = touches.droite = touches.saut = 0;
             SDL_Event event;
             int choix = -1;

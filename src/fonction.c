@@ -758,8 +758,17 @@ void initialiserCarapaces()
     for (int i = 0; i < MAX_ENNEMIS; i++)
     {
         carapaces[i].actif = 0;
+        carapaces[i].mobile = 0;
+        carapaces[i].vitesse = 0;
+        carapaces[i].direction = 0;
+        carapaces[i].tempsLancement = 0;
+        carapaces[i].rect.x = 0;
+        carapaces[i].rect.y = 0;
+        carapaces[i].rect.w = BLOC_SIZE;
+        carapaces[i].rect.h = BLOC_SIZE;
     }
 }
+
 
 void mettreAJourCarapaces()
 {
@@ -825,19 +834,25 @@ int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut)
             joueur->y + joueur->h > c->y && joueur->y < c->y + c->h;
 
         if (collisionLaterale)
+{
+    if (!carapaces[i].mobile)
+    {
+        // On l’active (Mario l’a tapée en marchant dessus)
+        carapaces[i].mobile = 1;
+        carapaces[i].vitesse = 6;
+        carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE;
+        carapaces[i].tempsLancement = maintenant;
+    }
+    else
+    {
+        // ⚠️ Ne tuer Mario que si la carapace est mobile depuis plus de 300 ms
+        if (carapaces[i].mobile && maintenant - carapaces[i].tempsLancement >= 200)
         {
-            if (!carapaces[i].mobile)
-            {
-                carapaces[i].mobile = SDL_TRUE;
-                carapaces[i].vitesse = 6;
-                carapaces[i].direction = (joueur->x < c->x) ? DROITE : GAUCHE; // Direction dans opossé au mario
-                carapaces[i].tempsLancement = maintenant;
-            }
-            else if (maintenant - carapaces[i].tempsLancement >= 300)
-            {
-                return 1;
-            }
+            return 1;
         }
+    }
+}
+
     }
 
     return 0;
