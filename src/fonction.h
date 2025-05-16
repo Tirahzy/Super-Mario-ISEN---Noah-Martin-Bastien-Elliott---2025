@@ -81,6 +81,8 @@ typedef struct
     SDL_Texture *toad;
 
     SDL_Texture *background;
+
+    SDL_Texture *vie;
 } TexturesJeu;
 
 typedef struct
@@ -143,6 +145,11 @@ typedef struct
     int hover;
 } Bouton;
 
+typedef struct {
+    int score;
+    int vies;
+} ScoreJeu;
+
 // Tableau de caractères pour les niveaux (fichier map.c)
 extern char niveau1[18][200];
 extern char niveau2[18][200];
@@ -181,7 +188,7 @@ void mettreAJourEnnemis();
 int detecterCollisionEntreEnnemis(SDL_Rect ennemi, int indexEnnemi);
 
 int detecterCollisionEnnemi(SDL_Rect joueur);
-int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut);
+int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut, ScoreJeu *scoreData);
 
 void initialiserEffets();
 void ajouterEffetEcrasement(int x, int y);
@@ -193,8 +200,6 @@ void mettreAJourCarapaces();
 int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut);
 void carapacesTuantEnnemis();
 void dessinerCarapaces(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
-
-void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police);
 
 void initialiserBoutons(Bouton boutons[], int nombreBoutons);
 void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons, TTF_Font *police);
@@ -213,5 +218,8 @@ void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cam
 
 int detecterCollisionBlocMystere(SDL_Rect joueur, float vitesseSaut);
 void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float vitesseSaut);
+
+void afficherScore(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TTF_Font *police);
+void afficherVies(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TexturesJeu textures);
 
 #endif

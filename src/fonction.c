@@ -84,6 +84,7 @@ TexturesJeu chargerTextures(SDL_Renderer *renderer)
     textures.toad = chargerTextureBMP(renderer, "img/toad.bmp");
 
     textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+    textures.vie = chargerTextureBMP(renderer, "img/vie.bmp");
 
     return textures;
 }
@@ -142,6 +143,8 @@ void libererTextures(TexturesJeu textures)
 
     if (textures.background)
         SDL_DestroyTexture(textures.background);
+    if (textures.vie)
+        SDL_DestroyTexture(textures.vie);
 }
 
 //---------------------------------------------------------
@@ -620,7 +623,7 @@ int detecterCollisionEnnemi(SDL_Rect joueur)
     return 0;
 }
 
-int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
+int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut, ScoreJeu *scoreData)
 {
     if (vitesseSaut > 0)
     {
@@ -630,18 +633,16 @@ int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
             {
                 int basJoueur = joueur.y + joueur.h;
                 int hautEnnemi = ennemis[i].rect.y;
-
+                
                 if (basJoueur >= hautEnnemi - 5 && basJoueur <= hautEnnemi + 10)
                 {
                     if (joueur.x < ennemis[i].rect.x + ennemis[i].rect.w &&
                         joueur.x + joueur.w > ennemis[i].rect.x)
                     {
-
                         ajouterEffetEcrasement(ennemis[i].rect.x, ennemis[i].rect.y);
-
+                        
                         if (ennemis[i].type == KOOPA)
                         {
-
                             for (int j = 0; j < MAX_ENNEMIS; j++)
                             {
                                 if (!carapaces[j].actif)
@@ -653,7 +654,13 @@ int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut)
                                 }
                             }
                         }
-
+                        
+                        // Il gagne 400 points
+                        // et un bonus de 100 points par ennemi tué dans les 5 secondes
+                        scoreData->score += 400;
+                        
+                        // Afficher l'effet de points (optionnel si vous avez cette fonction)
+                        
                         ennemis[i].actif = 0;
                         return 1;
                     }
@@ -845,7 +852,7 @@ int interagirAvecCarapaces(SDL_Rect *joueur, float *vitesseSaut)
     }
     else
     {
-        // ⚠️ Ne tuer Mario que si la carapace est mobile depuis plus de 300 ms
+        //Ne tuer Mario que si la carapace est mobile depuis plus de 200 ms
         if (carapaces[i].mobile && maintenant - carapaces[i].tempsLancement >= 200)
         {
             return 1;
@@ -905,10 +912,11 @@ void dessinerCarapaces(SDL_Renderer *renderer, int cameraX, TexturesJeu textures
 //---------------------------------------------------------
 // Affichage du score / vies
 
-void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police)
+void afficherScore(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TTF_Font *police)
 {
-    char texte[32];
-    sprintf(texte, "Score : %d", nbPieces);
+    char texte[64];
+    sprintf(texte, "Score : %d", scoreJeu->score);
+
 
     SDL_Color couleur = {255, 255, 255};
     SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, texte, couleur);
@@ -934,6 +942,24 @@ void afficherScore(SDL_Renderer *renderer, int nbPieces, TTF_Font *police)
 }
 
 // FONCTION VIES
+void afficherVies(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TexturesJeu textures)
+{
+    int taille = 30;
+    int marge = 10;
+    SDL_Rect rect;
+    rect.y = 10;
+    rect.w = taille;
+    rect.h = taille;
+
+    // Aligné à droite
+    rect.x = LONGUEUR_FENETRE - scoreJeu->vies * (taille + marge);
+
+    for (int i = 0; i < scoreJeu->vies; i++)
+    {
+        SDL_RenderCopy(renderer, textures.vie, NULL, &rect);
+        rect.x += taille + marge;
+    }
+}
 
 //---------------------------------------------------------
 // Boutons pour Menu

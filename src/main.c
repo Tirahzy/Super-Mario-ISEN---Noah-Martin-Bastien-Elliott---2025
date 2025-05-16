@@ -32,11 +32,12 @@ int main(int argc, char *argv[])
     int enSaut = 0;
     float vitesseSaut = 0.0f;
     int cameraX = 0;
-    int nbPieces = 0;
+    int Score = 0;
     int scoreFinal = 0;
     int current_level = 1;
     int continuer = 1;
     int etatJeu = ETAT_MENU;
+    ScoreJeu scoreJeu = {0, 3};
 
     initialiserMap(current_level);
     initialiserCarapaces();
@@ -63,6 +64,7 @@ int main(int argc, char *argv[])
             mario.invincible = 0;
             mario.tempsInvincible = 0;
 
+
             if (choix == ETAT_JEU)
             {
                 current_level = 1;
@@ -74,8 +76,9 @@ int main(int argc, char *argv[])
                 champi.vitesseY = 0;
                 champi.corps.x = 0;
                 champi.corps.y = 0;
-
-                nbPieces = 0;
+                
+                scoreJeu.score = 0;
+                scoreJeu.vies = 3;
                 initialiserMap(current_level);
                 initialiserCarapaces();
                 initialiserEffets();
@@ -175,7 +178,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (enSaut && sauterSurEnnemi(mario.corps, vitesseSaut))
+            if (enSaut && sauterSurEnnemi(mario.corps, vitesseSaut,&scoreJeu))
                 vitesseSaut = FORCE_SAUT / 1.5f;
 
             if (!mario.invincible && interagirAvecCarapaces(&mario.corps, &vitesseSaut))
@@ -205,10 +208,25 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    scoreFinal = nbPieces;
-                    etatJeu = ETAT_GAME_OVER;
-                    break;
+                   scoreJeu.vies--;
+                    if (scoreJeu.vies <= 0) {
+                        scoreFinal = scoreJeu.score;
+                        etatJeu = ETAT_GAME_OVER;
+                        break;
+                    } else {
+                        // Réinitialisation du niveau sans perdre le score
+                        mario.corps.x = startX;
+                        mario.corps.y = startY;
+                        enSaut = 0;
+                        vitesseSaut = 0;
+                        touches.gauche = touches.droite = touches.saut = 0;
+                        initialiserMap(current_level);
+                        initialiserCarapaces();
+                        initialiserEffets();
+                        cameraX = 0;
+                        break;
                 }
+            }
             }
 
             carapacesTuantEnnemis();
@@ -250,10 +268,25 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    scoreFinal = nbPieces;
-                    etatJeu = ETAT_GAME_OVER;
-                    break;
+                     scoreJeu.vies--;
+                    if (scoreJeu.vies <= 0) {
+                        scoreFinal = scoreJeu.score;
+                        etatJeu = ETAT_GAME_OVER;
+                        break;
+                    } else {
+                        // Réinitialisation du niveau sans perdre le score
+                        mario.corps.x = startX;
+                        mario.corps.y = startY;
+                        enSaut = 0;
+                        vitesseSaut = 0;
+                        touches.gauche = touches.droite = touches.saut = 0;
+                        initialiserMap(current_level);  // Recharger le niveau actuel
+                        initialiserCarapaces();
+                        initialiserEffets();
+                        cameraX = 0;
+                        break;
                 }
+            }
             }
 
             int gauche = mario.corps.x / BLOC_SIZE;
@@ -266,12 +299,12 @@ int main(int argc, char *argv[])
                     if (map[y][x] == PIECE)
                     {
                         map[y][x] = 0;
-                        nbPieces++;
+                        scoreJeu.score += 500;
                     }
 
             if (finDeNiveau(mario.corps))
             {
-                scoreFinal = nbPieces;
+                scoreJeu.score += 2000;
                 etatJeu = ETAT_NIVEAU_TERMINE;
                 break;
             }
@@ -291,7 +324,7 @@ int main(int argc, char *argv[])
                 {
                     champi.vitesseY = 0;
                     // Ajuste pile sur le bloc, sans le repousser violemment car sinon rebond
-    champi.corps.y = (champi.corps.y + BLOC_SIZE) / BLOC_SIZE * BLOC_SIZE - champi.corps.h;
+                champi.corps.y = (champi.corps.y + BLOC_SIZE) / BLOC_SIZE * BLOC_SIZE - champi.corps.h;
                 }
 
                 // DÉPLACEMENT HORIZONTAL
@@ -340,7 +373,8 @@ int main(int argc, char *argv[])
                 SDL_RenderCopy(renderer, textures.champignon, NULL, &dstCh);
             }
 
-            afficherScore(renderer, nbPieces, police);
+            afficherScore(renderer, &scoreJeu, police);
+            afficherVies(renderer, &scoreJeu, textures); 
             SDL_RenderPresent(renderer);
             SDL_Delay(16);
             break;
@@ -350,6 +384,7 @@ int main(int argc, char *argv[])
         {
             touches.gauche = touches.droite = touches.saut = 0;
             int choix = gererEvenementsNiveauTermine(&continuer, boutonsNiveauTermine, 2);
+            printf("choix = %d\n", choix);
 
             if (current_level == NOMBRE_NIVEAUX)
             {
@@ -382,7 +417,8 @@ int main(int argc, char *argv[])
                     .x = startX;
                 mario.corps
                     .y = startY;
-                nbPieces = 0;
+                scoreJeu.score= 0;
+                scoreJeu.vies = 3;
                 initialiserMap(current_level);
                 initialiserCarapaces();
                 initialiserEffets();
@@ -437,7 +473,8 @@ int main(int argc, char *argv[])
                     .x = startX;
                 mario.corps
                     .y = startY;
-                nbPieces = 0;
+                scoreJeu.score = 0;
+                scoreJeu.vies = 3;
                 enSaut = 0;
                 vitesseSaut = 0;
                 touches.gauche = touches.droite = touches.saut = 0;
@@ -466,6 +503,7 @@ int main(int argc, char *argv[])
         }
         }
     }
+    
 
     free(boutonsNiveauTermine[0].texte);
     free(boutonsNiveauTermine[1].texte);
