@@ -17,3 +17,8 @@ dataSources.local.xml
 #supprime le makefile
 Makefile
 # Node modules
+
+main.o
+map.o
+fonction.o
+Jeu.exe
