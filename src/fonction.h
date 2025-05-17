@@ -54,9 +54,10 @@
 #define ETAT_NIVEAU_TERMINE 3
 #define ETAT_SELECTION 4
 
-#define NB_BOUTONS_MENU 3
+#define NB_BOUTONS_MENU 4
 
-#define FICHIER_SAUVEGARDE "sauvegarde.dat"
+#define FICHIER_SAUVEGARDE "sauvegardes.txt"
+#define MAX_SAUVEGARDES 100 
 
 typedef struct
 {
@@ -155,8 +156,12 @@ typedef struct
 
 typedef struct
 {
-    int niveau;
+    char nom[50];
+    int niveauActuel;
+    int niveauMax;
+    int score;
 } Sauvegarde;
+
 
 // Tableau de caractères pour les niveaux (fichier map.c)
 extern char niveau1[18][200];
@@ -168,6 +173,7 @@ extern char niveau6[18][200];
 extern char niveau7[18][200];
 extern char niveau8[18][200];
 extern char niveau9[18][200];
+extern char bonus[18][200];
 
 extern int map[MAP_HAUTEUR][MAP_LARGEUR];
 
@@ -232,7 +238,13 @@ void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float 
 void afficherScore(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TTF_Font *police);
 void afficherVies(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TexturesJeu textures);
 
-void sauvegarderPartie(int niveau);
-int chargerPartie(int *niveau);
+int sauvegarderUtilisateur(const char *nom, int niveau, int score);
+int chargerUtilisateur(const char *nom, Sauvegarde *out);
+void saisirNomUtilisateur(SDL_Renderer *renderer, TTF_Font *police, char *nom, int maxLen);
+int afficherChoixChargement(SDL_Renderer *renderer, TTF_Font *police, SDL_Window *fenetre);
+
+int chargerToutesLesSauvegardes(Sauvegarde sauvegardes[], int max);
+void afficherTableauScores(SDL_Renderer *renderer, TTF_Font *police);
+
 
 #endif

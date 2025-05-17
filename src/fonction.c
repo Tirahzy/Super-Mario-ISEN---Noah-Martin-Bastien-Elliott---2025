@@ -318,6 +318,9 @@ void initialiserMap(int niveau)
     case 9:
         sourceMap = niveau9;
         break;
+    case 0:
+        sourceMap = bonus;
+        break;
     default:
         sourceMap = niveau1;
         break;
@@ -975,18 +978,25 @@ void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons
 {
     for (int i = 0; i < nombreBoutons; i++)
     {
-        if (boutons[i].hover)
+        // Couleur du bouton selon son état
+        if (boutons[i].hover == -1)
         {
-            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
+            SDL_SetRenderDrawColor(renderer, 80, 80, 80, 255); // Gris foncé : désactivé
+        }
+        else if (boutons[i].hover == 1)
+        {
+            SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255); // Bleu clair : survolé
         }
         else
         {
-            SDL_SetRenderDrawColor(renderer, 70, 70, 200, 255);
+            SDL_SetRenderDrawColor(renderer, 70, 70, 200, 255); // Bleu normal
         }
 
         SDL_RenderFillRect(renderer, &boutons[i].rect);
 
-        SDL_Color couleurTexte = {255, 255, 255};
+        // Texte en blanc sauf si désactivé
+        SDL_Color couleurTexte = (boutons[i].hover == -1) ? (SDL_Color){180, 180, 180} : (SDL_Color){255, 255, 255};
+
         SDL_Surface *surfaceTexte = TTF_RenderText_Solid(police, boutons[i].texte, couleurTexte);
         if (!surfaceTexte)
         {
@@ -1014,6 +1024,7 @@ void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons
         SDL_DestroyTexture(textureTexte);
     }
 }
+
 
 int pointDansRect(int x, int y, SDL_Rect rect)
 {
@@ -1050,12 +1061,7 @@ int gererEvenementsMenu(int *continuer, Bouton boutons[], int nombreBoutons)
                 {
                     if (pointDansRect(mx, my, boutons[i].rect))
                     {
-                        if (i == 0)
-                            return ETAT_JEU;
-                        else if (i == 1)
-                            return ETAT_SELECTION;
-                        else if (i == 2)
-                            *continuer = 0;
+                        return i;  
                     }
                 }
             }
@@ -1237,7 +1243,6 @@ int gererGameOver(int *continuer, Bouton boutons[], int nombreBoutons)
     return -1;
 }
 
-
 //---------------------------------------------------------
 // Affichage des transitions entre les mondes
 
@@ -1381,7 +1386,6 @@ void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police)
     SDL_DestroyTexture(textureTexte);
 }
 
-
 //---------------------------------------------------------
 // Affichage background
 
@@ -1400,30 +1404,354 @@ void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cam
 
 //---------------------------------------------------------
 // Fonction de sauvegarde de la partie
-void sauvegarderPartie(int niveau)
-{
-    FILE *fichier = fopen(FICHIER_SAUVEGARDE, "wb");
-    if (!fichier)
-        return;
+int sauvegarderUtilisateur(const char *nom, int niveauActuel, int score) {
+    FILE *f = fopen(FICHIER_SAUVEGARDE, "r");
+    Sauvegarde sauvegardes[MAX_SAUVEGARDES];
+    int n = 0;
+    int trouve = 0;
 
-    Sauvegarde sauvegarde = {niveau};
-    fwrite(&sauvegarde, sizeof(Sauvegarde), 1, fichier);
-    fclose(fichier);
-}
+    if (f) {
+        while (fscanf(f, "%49s %d %d %d", 
+                      sauvegardes[n].nom, 
+                      &sauvegardes[n].niveauActuel, 
+                      &sauvegardes[n].niveauMax, 
+                      &sauvegardes[n].score) == 4) {
 
-int chargerPartie(int *niveau)
-{
-    FILE *fichier = fopen(FICHIER_SAUVEGARDE, "rb");
-    if (!fichier)
+            if (strcmp(sauvegardes[n].nom, nom) == 0) {
+                sauvegardes[n].niveauActuel = niveauActuel;
+                if (niveauActuel > sauvegardes[n].niveauMax) {
+                    sauvegardes[n].niveauMax = niveauActuel;
+                }
+                if (score > sauvegardes[n].score) {
+                    sauvegardes[n].score = score;
+                }
+                trouve = 1;
+            }
+
+            n++;
+            if (n >= MAX_SAUVEGARDES) break;
+        }
+        fclose(f);
+    }
+
+    if (!trouve && n < MAX_SAUVEGARDES) {
+        strncpy(sauvegardes[n].nom, nom, 49);
+        sauvegardes[n].nom[49] = '\0';
+        sauvegardes[n].niveauActuel = niveauActuel;
+        sauvegardes[n].niveauMax = niveauActuel;
+        sauvegardes[n].score = score;
+        n++;
+    }
+
+    f = fopen(FICHIER_SAUVEGARDE, "w");
+    if (!f) {
+        perror("[ERREUR fopen]");
         return 0;
+    }
 
-    Sauvegarde sauvegarde;
-    size_t lu = fread(&sauvegarde, sizeof(Sauvegarde), 1, fichier);
-    fclose(fichier);
+    for (int i = 0; i < n; i++) {
+        fprintf(f, "%s %d %d %d\n", 
+                sauvegardes[i].nom, 
+                sauvegardes[i].niveauActuel, 
+                sauvegardes[i].niveauMax, 
+                sauvegardes[i].score);
+    }
 
-    if (lu != 1)
-        return 0;
-
-    *niveau = sauvegarde.niveau;
+    fclose(f);
     return 1;
 }
+
+
+
+
+
+int chargerUtilisateur(const char *nom, Sauvegarde *out) {
+    FILE *f = fopen(FICHIER_SAUVEGARDE, "r");
+    if (!f) {
+        printf(">>> Fichier sauvegarde introuvable.\n");
+        return 0;
+    }
+
+    while (fscanf(f, "%49s %d %d %d", out->nom, &out->niveauActuel, &out->niveauMax, &out->score) == 4) {
+        if (strcmp(out->nom, nom) == 0) {
+            fclose(f);
+            return 1;
+        }
+    }
+
+    fclose(f);
+    return 0;
+}
+
+
+
+
+void saisirNomUtilisateur(SDL_Renderer *renderer, TTF_Font *police, char *nom, int maxLen)
+{
+    SDL_Color couleurTexte = {255, 255, 255};
+    SDL_Color couleurFond = {0, 0, 0};
+
+    int nomValide = 0;
+
+    while (!nomValide)
+    {
+        SDL_StartTextInput();
+        SDL_Event event;
+        int terminer = 0;
+        nom[0] = '\0';
+
+        while (!terminer)
+        {
+            while (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_QUIT)
+                {
+                    terminer = 1;
+                    nom[0] = '\0';
+                }
+                else if (event.type == SDL_TEXTINPUT)
+                {
+                    if (strlen(nom) + strlen(event.text.text) < maxLen - 1)
+                    {
+                        strcat(nom, event.text.text);
+                    }
+                }
+                else if (event.type == SDL_KEYDOWN)
+                {
+                    if (event.key.keysym.sym == SDLK_BACKSPACE && strlen(nom) > 0)
+                    {
+                        nom[strlen(nom) - 1] = '\0';
+                    }
+                    else if (event.key.keysym.sym == SDLK_RETURN)
+                    {
+                        terminer = 1;
+                    }
+                    else if (event.key.keysym.sym == SDLK_ESCAPE)
+                    {
+                        terminer = 1;
+                        nom[0] = '\0'; // Annuler
+                    }
+                }
+            }
+
+            SDL_SetRenderDrawColor(renderer, couleurFond.r, couleurFond.g, couleurFond.b, 255);
+            SDL_RenderClear(renderer);
+
+            SDL_Surface *surface = TTF_RenderText_Solid(police, "Entrez votre nom :", couleurTexte);
+            SDL_Texture *texteTexture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_Rect dest1 = {100, 100, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texteTexture, NULL, &dest1);
+            SDL_FreeSurface(surface);
+            SDL_DestroyTexture(texteTexture);
+
+            char affichage[128];
+            snprintf(affichage, sizeof(affichage), "%s|", nom); // curseur
+
+            surface = TTF_RenderText_Solid(police, affichage, couleurTexte);
+            texteTexture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_Rect dest2 = {100, 160, surface->w, surface->h};
+            SDL_RenderCopy(renderer, texteTexture, NULL, &dest2);
+            SDL_FreeSurface(surface);
+            SDL_DestroyTexture(texteTexture);
+
+            SDL_RenderPresent(renderer);
+            SDL_Delay(16);
+        }
+
+        SDL_StopTextInput();
+
+        // Vérifie si le nom est non vide et pas que des espaces
+        int i, tousEspaces = 1;
+        for (i = 0; nom[i] != '\0'; i++)
+        {
+            if (nom[i] != ' ')
+            {
+                tousEspaces = 0;
+                break;
+            }
+        }
+
+        if (strlen(nom) > 0 && !tousEspaces)
+        {
+            nomValide = 1;
+        }
+        else
+        {
+            // Message d'erreur simple dans la console
+
+            // Facultatif : attendre une seconde pour que l'utilisateur voie le message
+            SDL_Delay(1000);
+        }
+    }
+}
+
+
+
+int afficherChoixChargement(SDL_Renderer *renderer, TTF_Font *police, SDL_Window *fenetre)
+{
+    Bouton boutons[2] = {
+        {{(LONGUEUR_FENETRE - 300) / 2, 200, 300, 60}, "Charger la sauvegarde", 0},
+        {{(LONGUEUR_FENETRE - 300) / 2, 300, 300, 60}, "Entrer un autre nom", 0}
+    };
+
+    SDL_Event event;
+    int choix = -1;
+
+    while (choix == -1)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT)
+            {
+                return -1;
+            }
+
+            if (event.type == SDL_MOUSEMOTION)
+            {
+                int mx = event.motion.x, my = event.motion.y;
+                for (int i = 0; i < 2; i++)
+                    boutons[i].hover = pointDansRect(mx, my, boutons[i].rect);
+            }
+
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
+            {
+                int mx = event.button.x, my = event.button.y;
+                for (int i = 0; i < 2; i++)
+                {
+                    if (pointDansRect(mx, my, boutons[i].rect))
+                    {
+                        choix = i;
+                    }
+                }
+            }
+
+            if (event.type == SDL_KEYDOWN)
+            {
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                    choix = 1;
+                else if (event.key.keysym.sym == SDLK_SPACE)
+                    choix = 0;
+            }
+        }
+
+        SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
+        SDL_RenderClear(renderer);
+
+        SDL_Color couleurTitre = {255, 255, 255};
+        SDL_Surface *titre = TTF_RenderText_Solid(police, "Sauvegarde trouvee :", couleurTitre);
+        SDL_Texture *textureTitre = SDL_CreateTextureFromSurface(renderer, titre);
+        SDL_Rect rectTitre = {(LONGUEUR_FENETRE - titre->w) / 2, 100, titre->w, titre->h};
+        SDL_RenderCopy(renderer, textureTitre, NULL, &rectTitre);
+        SDL_FreeSurface(titre);
+        SDL_DestroyTexture(textureTitre);
+
+        dessinerBoutons(renderer, boutons, 2, police);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(16);
+    }
+
+    return choix;
+}
+
+
+int chargerToutesLesSauvegardes(Sauvegarde sauvegardes[], int max) {
+    FILE *f = fopen(FICHIER_SAUVEGARDE, "r");
+    if (!f) return 0;
+
+    int count = 0;
+    while (count < max && fscanf(f, "%49s %d %d %d", 
+            sauvegardes[count].nom, 
+            &sauvegardes[count].niveauActuel, 
+            &sauvegardes[count].niveauMax, 
+            &sauvegardes[count].score) == 4) {
+        count++;
+    }
+
+    fclose(f);
+    return count;
+}
+
+
+int comparerScores(const void *a, const void *b) {
+    Sauvegarde *s1 = (Sauvegarde *)a;
+    Sauvegarde *s2 = (Sauvegarde *)b;
+    return s2->score - s1->score; // tri décroissant
+}
+
+void afficherTableauScores(SDL_Renderer *renderer, TTF_Font *police)
+{
+    Sauvegarde sauvegardes[MAX_SAUVEGARDES];
+    int nb = chargerToutesLesSauvegardes(sauvegardes, MAX_SAUVEGARDES);
+
+    if (nb == 0)
+        return;
+
+    // Tri décroissant des scores
+    for (int i = 0; i < nb - 1; i++)
+    {
+        for (int j = i + 1; j < nb; j++)
+        {
+            if (sauvegardes[j].score > sauvegardes[i].score)
+            {
+                Sauvegarde tmp = sauvegardes[i];
+                sauvegardes[i] = sauvegardes[j];
+                sauvegardes[j] = tmp;
+            }
+        }
+    }
+
+    int afficher = (nb < 10) ? nb : 10;
+
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200); // fond semi-transparent
+    SDL_Rect fond = {LONGUEUR_FENETRE / 2 - 250, 100, 500, 60 + afficher * 40};
+    SDL_RenderFillRect(renderer, &fond);
+
+    SDL_Color couleurTexte = {255, 255, 255};
+    SDL_Surface *titre = TTF_RenderText_Solid(police, "CLASSEMENT DES SCORES", couleurTexte);
+    SDL_Texture *titreTex = SDL_CreateTextureFromSurface(renderer, titre);
+    SDL_Rect posTitre = {fond.x + (fond.w - titre->w) / 2, fond.y + 10, titre->w, titre->h};
+    SDL_RenderCopy(renderer, titreTex, NULL, &posTitre);
+    SDL_FreeSurface(titre);
+    SDL_DestroyTexture(titreTex);
+
+    for (int i = 0; i < afficher; i++)
+    {
+        char ligne[128];
+        snprintf(ligne, sizeof(ligne), "%2d. %-20s  %5d pts", i + 1, sauvegardes[i].nom, sauvegardes[i].score);
+
+        SDL_Surface *surface = TTF_RenderText_Solid(police, ligne, couleurTexte);
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Rect pos = {
+            fond.x + 30,
+            fond.y + 50 + i * 35,
+            surface->w,
+            surface->h};
+        SDL_RenderCopy(renderer, texture, NULL, &pos);
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+    }
+
+    SDL_RenderPresent(renderer);
+
+    SDL_Event ev;
+    int attendre = 1;
+    while (attendre)
+    {
+        while (SDL_PollEvent(&ev))
+        {
+            if (ev.type == SDL_QUIT)
+            {
+                attendre = 0;
+            }
+            else if (ev.type == SDL_KEYDOWN || ev.type == SDL_MOUSEBUTTONDOWN)
+            {
+                attendre = 0;
+            }
+        }
+        SDL_Delay(10);
+    }
+}
+
+
+
+
