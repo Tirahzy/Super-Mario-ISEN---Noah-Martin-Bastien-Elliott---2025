@@ -108,11 +108,11 @@ typedef struct
 typedef struct
 {
     SDL_Rect rect;
-    int actif; 
+    int actif;
     int type; // GOOMBA ou KOOPA
     int direction;
     int animation;
-} Ennemi; 
+} Ennemi;
 
 typedef struct
 {
@@ -145,7 +145,7 @@ typedef struct
 {
     SDL_Rect corps;
     int estGrand;
-    int invincible; // 1 = invincible, 0 = normal
+    int invincible;      // 1 = invincible, 0 = normal
     int tempsInvincible; // temps en ms où il est devenu invincible
     int direction;
 } Mario;
@@ -169,8 +169,7 @@ typedef struct
     char nom[50];
     int niveauActuel;
     int niveauMax;
-    int scoreActuel;
-    int scoreMax;
+    int score;
 } Sauvegarde;
 
 typedef struct

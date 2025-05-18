@@ -1452,12 +1452,11 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
 
     if (f)
     {
-        while (fscanf(f, "%49s %d %d %d %d",
+        while (fscanf(f, "%49s %d %d %d",
                       sauvegardes[n].nom,
                       &sauvegardes[n].niveauActuel,
                       &sauvegardes[n].niveauMax,
-                      &sauvegardes[n].scoreActuel,
-                      &sauvegardes[n].scoreMax) == 5)
+                      &sauvegardes[n].score) == 4)
         {
 
             if (strcmp(sauvegardes[n].nom, nom) == 0)
@@ -1467,11 +1466,10 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
                 {
                     sauvegardes[n].niveauMax = niveauActuel;
                 }
-                if (score > sauvegardes[n].scoreMax)
+                if (score > sauvegardes[n].score)
                 {
-                    sauvegardes[n].scoreMax = score;
+                    sauvegardes[n].score = score;
                 }
-                sauvegardes[n].scoreActuel = score;
                 trouve = 1;
             }
 
@@ -1488,8 +1486,7 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
         sauvegardes[n].nom[49] = '\0';
         sauvegardes[n].niveauActuel = niveauActuel;
         sauvegardes[n].niveauMax = niveauActuel;
-        sauvegardes[n].scoreActuel = score;
-        sauvegardes[n].scoreMax = score;
+        sauvegardes[n].score = score;
         n++;
     }
 
@@ -1502,12 +1499,11 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
 
     for (int i = 0; i < n; i++)
     {
-        fprintf(f, "%s %d %d %d %d\n",
+        fprintf(f, "%s %d %d %d\n",
                 sauvegardes[i].nom,
                 sauvegardes[i].niveauActuel,
                 sauvegardes[i].niveauMax,
-                sauvegardes[i].scoreActuel,
-                sauvegardes[i].scoreMax);
+                sauvegardes[i].score);
     }
 
     fclose(f);
@@ -1523,7 +1519,7 @@ int chargerUtilisateur(char nom[], Sauvegarde *out)
         return 0;
     }
 
-    while (fscanf(f, "%49s %d %d %d", out->nom, &out->niveauActuel, &out->niveauMax, &out->scoreActuel, &out->scoreMax) == 5)
+    while (fscanf(f, "%49s %d %d %d", out->nom, &out->niveauActuel, &out->niveauMax, &out->score) == 4)
     {
         if (strcmp(out->nom, nom) == 0)
         {
@@ -1706,12 +1702,11 @@ int chargerToutesLesSauvegardes(Sauvegarde sauvegardes[], int max)
         return 0;
 
     int count = 0;
-    while (count < max && fscanf(f, "%49s %d %d %d %d",
+    while (count < max && fscanf(f, "%49s %d %d %d",
                                  sauvegardes[count].nom,
                                  &sauvegardes[count].niveauActuel,
                                  &sauvegardes[count].niveauMax,
-                                 &sauvegardes[count].scoreActuel,
-                                 &sauvegardes[count].scoreMax) == 5)
+                                 &sauvegardes[count].score) == 4)
     {
         count++;
     }
@@ -1733,7 +1728,7 @@ void afficherTableauScores(SDL_Renderer *renderer, TTF_Font *police)
     {
         for (int j = i + 1; j < nb; j++)
         {
-            if (sauvegardes[j].scoreMax > sauvegardes[i].scoreMax)
+            if (sauvegardes[j].score > sauvegardes[i].score)
             {
                 Sauvegarde tmp = sauvegardes[i];
                 sauvegardes[i] = sauvegardes[j];
@@ -1759,7 +1754,7 @@ void afficherTableauScores(SDL_Renderer *renderer, TTF_Font *police)
     for (int i = 0; i < afficher; i++)
     {
         char ligne[128];
-        snprintf(ligne, sizeof(ligne), "%2d. %-20s  %5d pts", i + 1, sauvegardes[i].nom, sauvegardes[i].scoreMax);
+        snprintf(ligne, sizeof(ligne), "%2d. %-20s  %5d pts", i + 1, sauvegardes[i].nom, sauvegardes[i].score);
 
         SDL_Surface *surface = TTF_RenderText_Solid(police, ligne, couleurTexte);
         SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);

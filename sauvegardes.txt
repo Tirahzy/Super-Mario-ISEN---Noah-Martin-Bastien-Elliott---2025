@@ -1,7 +1,2 @@
-noah 1 9 0 10000499
-bastien 9 9 0 76547
-elliott 3 9 0 64464
-martin 9 9 0 876349
-spirou 1 9 0 121300
-luidgi 1 7 0 2000
-e 1 9 0 9876
+noah 1 9 0
+e 5 9 4800

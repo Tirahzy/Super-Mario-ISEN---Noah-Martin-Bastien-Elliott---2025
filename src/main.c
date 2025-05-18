@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
             if (choix == 0)
             { // Charger la sauvegarde
                 current_level = data.niveauActuel;
-                scoreJeu.score = data.scoreActuel;
+                scoreJeu.score = data.score;
                 chargementReussi = 1;
             }
             else if (choix == -1)
@@ -116,9 +116,8 @@ int main(int argc, char *argv[])
             scoreJeu.score = 0;
             data.niveauActuel = current_level;
             data.niveauMax = current_level;
-            data.scoreActuel = scoreJeu.score;
-            data.scoreMax = scoreJeu.score;
-            sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
+            data.score = scoreJeu.score;
+            sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.score);
 
             chargementReussi = 1;
         }
@@ -738,9 +737,9 @@ int main(int argc, char *argv[])
                         data.niveauMax = current_level;
 
                     data.niveauActuel = current_level;
-                    data.scoreActuel = scoreJeu.score;
+                    data.score = scoreJeu.score;
 
-                    sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
+                    sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.score);
                 }
                 else
                 {
@@ -868,14 +867,9 @@ int main(int argc, char *argv[])
 
     // Sauvegarde avant de quitter
     data.niveauActuel = current_level;
-    data.scoreActuel = scoreJeu.score;
+    data.score = scoreJeu.score;
     if (current_level != 0)
         sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score);
-    if (scoreFinal > data.scoreMax)
-    {
-        data.scoreMax = scoreFinal;
-        sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
-    }
 
     // Libération des ressources
     free(boutonsNiveauTermine[0].texte);
