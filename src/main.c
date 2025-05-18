@@ -42,20 +42,20 @@ int main(int argc, char *argv[])
     int musiqueEnCours = 0;
 
     // Initialisation des variables de jeu
-    int startX = 100; // Position de départ de Mario X
+    int startX = 100;                                       // Position de départ de Mario X
     int startY = (MAP_HAUTEUR - 3) * BLOC_SIZE - BLOC_SIZE; // Position de départ de Mario Y
     Mario mario = {{startX, startY, BLOC_SIZE, BLOC_SIZE}, 0};
 
     Touches touches = {0, 0, 0}; // Aucune touche enfoncée
-    int enSaut = 0; // Indique si Mario est en train de sauter
+    int enSaut = 0;              // Indique si Mario est en train de sauter
     float vitesseSaut = 0.0f;
     int cameraX = 0;
-    int scoreFinal = 0; // Score final du joueur
+    int scoreFinal = 0;    // Score final du joueur
     int current_level = 1; // Niveau actuel
     char nomUtilisateur[50];
-    Sauvegarde data; // Données de sauvegarde
-    int continuer = 1; // Variable pour la boucle principale
-    int etatJeu = ETAT_MENU; // État du jeu (menu, jeu, game over, etc.)
+    Sauvegarde data;            // Données de sauvegarde
+    int continuer = 1;          // Variable pour la boucle principale
+    int etatJeu = ETAT_MENU;    // État du jeu (menu, jeu, game over, etc.)
     ScoreJeu scoreJeu = {0, 3}; // Score et vies du joueur
 
     initialiserMap(current_level);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
             if (choix == 0)
             { // Charger la sauvegarde
                 current_level = data.niveauActuel;
-                scoreJeu.score = data.score;
+                scoreJeu.score = data.scoreActuel;
                 chargementReussi = 1;
             }
             else if (choix == -1)
@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
             scoreJeu.score = 0;
             data.niveauActuel = current_level;
             data.niveauMax = current_level;
-            data.score = scoreJeu.score;
-            sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.score);
+            data.scoreActuel = scoreJeu.score;
+            data.scoreMax = scoreJeu.score;
+            sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
 
             chargementReussi = 1;
         }
@@ -353,14 +354,14 @@ int main(int argc, char *argv[])
                 test.x -= VITESSE_DEPLACEMENT;
                 if (!detecterCollision(test))
                     mario.corps.x = test.x;
-                    mario.direction = GAUCHE;
+                mario.direction = GAUCHE;
             }
             if (touches.droite)
             {
                 test.x += VITESSE_DEPLACEMENT;
                 if (!detecterCollision(test))
                     mario.corps.x = test.x;
-                    mario.direction = DROITE;
+                mario.direction = DROITE;
             }
 
             if (enSaut)
@@ -737,9 +738,9 @@ int main(int argc, char *argv[])
                         data.niveauMax = current_level;
 
                     data.niveauActuel = current_level;
-                    data.score = scoreJeu.score;
+                    data.scoreActuel = scoreJeu.score;
 
-                    sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.score);
+                    sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
                 }
                 else
                 {
@@ -790,7 +791,7 @@ int main(int argc, char *argv[])
                 musiqueEnCours = 0;
             }
             Mix_PlayChannel(-1, sons.gameOver, 0);
-            
+
             mario.invincible = 0;
             mario.tempsInvincible = 0;
             champi.actif = 0;
@@ -867,9 +868,14 @@ int main(int argc, char *argv[])
 
     // Sauvegarde avant de quitter
     data.niveauActuel = current_level;
-    data.score = scoreJeu.score;
+    data.scoreActuel = scoreJeu.score;
     if (current_level != 0)
         sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score);
+    if (scoreFinal > data.scoreMax)
+    {
+        data.scoreMax = scoreFinal;
+        sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
+    }
 
     // Libération des ressources
     free(boutonsNiveauTermine[0].texte);
