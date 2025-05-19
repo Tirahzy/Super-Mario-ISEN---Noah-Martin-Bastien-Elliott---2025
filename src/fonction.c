@@ -1717,12 +1717,13 @@ int chargerToutesLesSauvegardes(Sauvegarde sauvegardes[], int max)
         return 0;
 
     int count = 0;
-    while (count < max && fscanf(f, "%49s %d %d %d %d",
+    while (count < max && fscanf(f, "%49s %d %d %d %d %d",
                                  sauvegardes[count].nom,
                                  &sauvegardes[count].niveauActuel,
                                  &sauvegardes[count].niveauMax,
                                  &sauvegardes[count].scoreActuel,
-                                 &sauvegardes[count].scoreMax) == 5)
+                                 &sauvegardes[count].scoreMax,
+                                 &sauvegardes[count].vies) == 6)
     {
         count++;
     }

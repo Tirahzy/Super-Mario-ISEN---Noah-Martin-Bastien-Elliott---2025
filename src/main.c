@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
     int continuer = 1;          // Variable pour la boucle principale
     int etatJeu = ETAT_MENU;    // État du jeu (menu, jeu, game over, etc.)
     ScoreJeu scoreJeu = {0, 3}; // Score et vies du joueur
+    int scoreDebutNiveau = 0;
 
     initialiserMap(current_level);
     initialiserCarapaces();
@@ -99,6 +100,7 @@ int main(int argc, char *argv[])
                 current_level = data.niveauActuel;
                 scoreJeu.score = data.scoreActuel;
                 scoreJeu.vies = data.vies;
+                scoreDebutNiveau = data.scoreActuel;
                 chargementReussi = 1;
             }
             else if (choix == -1)
@@ -177,6 +179,8 @@ int main(int argc, char *argv[])
                 scoreJeu.vies = data.vies;
 
                 initialiserMap(current_level);
+                scoreDebutNiveau = scoreJeu.score;
+
                 SDL_DestroyTexture(textures.background);
                 if (current_level == 0)
                     textures.background = chargerTextureBMP(renderer, "img/bonus.bmp");
@@ -313,7 +317,8 @@ int main(int argc, char *argv[])
                 current_level = choixNiv;
                 mario.corps.x = startX;
                 mario.corps.y = startY;
-                scoreJeu.score = 0;
+                // NE PAS REMETTRE À ZÉRO ! Garder le score actuel
+                scoreDebutNiveau = scoreJeu.score;
 
                 SDL_DestroyTexture(textures.background);
                 if (current_level == 0)
@@ -326,6 +331,8 @@ int main(int argc, char *argv[])
                     textures.background = chargerTextureBMP(renderer, "img/fond3.bmp");
 
                 initialiserMap(current_level);
+                scoreDebutNiveau = scoreJeu.score;
+
                 initialiserCarapaces();
                 initialiserEffets();
                 etatJeu = ETAT_JEU;
@@ -466,6 +473,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     scoreJeu.vies--;
+                    scoreJeu.score = scoreDebutNiveau;
                     // Sauvegarder
                     sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score, scoreJeu.vies);
                     if (scoreJeu.vies <= 0)
@@ -542,6 +550,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     scoreJeu.vies--;
+                    scoreJeu.score = scoreDebutNiveau;
                     sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score, scoreJeu.vies);
                     if (scoreJeu.vies <= 0)
                     {
@@ -737,6 +746,8 @@ int main(int argc, char *argv[])
                 if (current_level != 0)
                 {
                     current_level++;
+                    scoreDebutNiveau = scoreJeu.score;
+
 
                     // Mise à jour du niveau maximum si nécessaire
                     if (current_level > data.niveauMax)
