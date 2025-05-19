@@ -169,7 +169,8 @@ typedef struct
     char nom[50];
     int niveauActuel;
     int niveauMax;
-    int score;
+    int scoreActuel;
+    int scoreMax;
 } Sauvegarde;
 
 typedef struct
