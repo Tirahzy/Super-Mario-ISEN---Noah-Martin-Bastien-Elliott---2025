@@ -21,7 +21,13 @@ Un jeu de plateforme inspiré de Mario, entièrement développé en **C** avec l
 
 ## 🚀 Lancer le jeu
 
-Niveau bonus en pressant "G" dans le choix de niveau 🤫​
+- Q gauche
+- D droite
+- espace sauter
+
+- Niveau bonus en pressant "G" dans le choix de niveau 🤫​
+
+## Documentation projet externe
 
 Trello : https://trello.com/b/kG16gu5s/projet-mario-info-cir-1
 
