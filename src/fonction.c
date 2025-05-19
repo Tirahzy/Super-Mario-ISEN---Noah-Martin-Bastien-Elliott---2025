@@ -1443,7 +1443,7 @@ void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cam
 //---------------------------------------------------------
 // Fonction de sauvegarde de la partie
 
-int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
+int sauvegarderUtilisateur(char nom[], int niveauActuel, int score, int vies)
 {
     FILE *f = fopen(FICHIER_SAUVEGARDE, "r");
     Sauvegarde sauvegardes[MAX_SAUVEGARDES];
@@ -1452,12 +1452,13 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
 
     if (f)
     {
-        while (fscanf(f, "%49s %d %d %d %d",
+        while (fscanf(f, "%49s %d %d %d %d %d",
                       sauvegardes[n].nom,
                       &sauvegardes[n].niveauActuel,
                       &sauvegardes[n].niveauMax,
                       &sauvegardes[n].scoreActuel,
-                      &sauvegardes[n].scoreMax) == 5)
+                      &sauvegardes[n].scoreMax,
+                      &sauvegardes[n].vies) == 6)
         {
 
             if (strcmp(sauvegardes[n].nom, nom) == 0)
@@ -1472,6 +1473,7 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
                     sauvegardes[n].scoreMax = score;
                 }
                 sauvegardes[n].scoreActuel = score;
+                sauvegardes[n].vies = vies;
                 trouve = 1;
             }
 
@@ -1490,6 +1492,7 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
         sauvegardes[n].niveauMax = niveauActuel;
         sauvegardes[n].scoreActuel = score;
         sauvegardes[n].scoreMax = score;
+        sauvegardes[n].vies = vies;
         n++;
     }
 
@@ -1502,12 +1505,13 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
 
     for (int i = 0; i < n; i++)
     {
-        fprintf(f, "%s %d %d %d %d\n",
+        fprintf(f, "%s %d %d %d %d %d\n",
                 sauvegardes[i].nom,
                 sauvegardes[i].niveauActuel,
                 sauvegardes[i].niveauMax,
                 sauvegardes[i].scoreActuel,
-                sauvegardes[i].scoreMax);
+                sauvegardes[i].scoreMax,
+                sauvegardes[i].vies);
     }
 
     fclose(f);
@@ -1523,7 +1527,7 @@ int chargerUtilisateur(char nom[], Sauvegarde *out)
         return 0;
     }
 
-    while (fscanf(f, "%49s %d %d %d %d", out->nom, &out->niveauActuel, &out->niveauMax, &out->scoreActuel, &out->scoreMax) == 5)
+    while (fscanf(f, "%49s %d %d %d %d %d", out->nom, &out->niveauActuel, &out->niveauMax, &out->scoreActuel, &out->scoreMax, &out->vies) == 6)
     {
         if (strcmp(out->nom, nom) == 0)
         {

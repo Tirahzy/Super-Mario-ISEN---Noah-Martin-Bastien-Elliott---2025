@@ -171,6 +171,7 @@ typedef struct
     int niveauMax;
     int scoreActuel;
     int scoreMax;
+    int vies;
 } Sauvegarde;
 
 typedef struct
@@ -257,7 +258,7 @@ void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
 
 void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
 
-int sauvegarderUtilisateur(char nom[], int niveau, int score);
+int sauvegarderUtilisateur(char nom[], int niveau, int score, int vies);
 int chargerUtilisateur(char nom[], Sauvegarde *out);
 void saisirNomUtilisateur(SDL_Renderer *renderer, TTF_Font *police, char *nom, int maxLen);
 int afficherChoixChargement(SDL_Renderer *renderer, TTF_Font *police, SDL_Window *fenetre);

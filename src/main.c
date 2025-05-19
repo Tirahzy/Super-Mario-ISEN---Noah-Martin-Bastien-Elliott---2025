@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
             { // Charger la sauvegarde
                 current_level = data.niveauActuel;
                 scoreJeu.score = data.scoreActuel;
+                scoreJeu.vies = data.vies;
                 chargementReussi = 1;
             }
             else if (choix == -1)
@@ -118,7 +119,8 @@ int main(int argc, char *argv[])
             data.niveauMax = current_level;
             data.scoreActuel = scoreJeu.score;
             data.scoreMax = scoreJeu.score;
-            sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
+            data.vies = scoreJeu.vies;
+            sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel, data.vies);
 
             chargementReussi = 1;
         }
@@ -172,7 +174,7 @@ int main(int argc, char *argv[])
                 champi.vitesseY = 0;
                 champi.corps.x = 0;
                 champi.corps.y = 0;
-                scoreJeu.vies = 3;
+                scoreJeu.vies = data.vies;
 
                 initialiserMap(current_level);
                 SDL_DestroyTexture(textures.background);
@@ -464,6 +466,8 @@ int main(int argc, char *argv[])
                 else
                 {
                     scoreJeu.vies--;
+                    // Sauvegarder
+                    sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score, scoreJeu.vies);
                     if (scoreJeu.vies <= 0)
                     {
                         scoreFinal = scoreJeu.score;
@@ -538,6 +542,7 @@ int main(int argc, char *argv[])
                 else
                 {
                     scoreJeu.vies--;
+                    sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score, scoreJeu.vies);
                     if (scoreJeu.vies <= 0)
                     {
                         scoreFinal = scoreJeu.score;
@@ -739,8 +744,9 @@ int main(int argc, char *argv[])
 
                     data.niveauActuel = current_level;
                     data.scoreActuel = scoreJeu.score;
+                    data.vies = scoreJeu.vies;
 
-                    sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel);
+                    sauvegarderUtilisateur(nomUtilisateur, data.niveauActuel, data.scoreActuel, data.vies);
                 }
                 else
                 {
@@ -750,7 +756,10 @@ int main(int argc, char *argv[])
 
                 mario.corps.x = startX;
                 mario.corps.y = startY;
-                scoreJeu.vies = 3;
+                if (scoreJeu.vies < 3)
+                    scoreJeu.vies++;
+                else
+                    scoreJeu.vies = 3;
 
                 initialiserMap(current_level);
 
@@ -856,6 +865,8 @@ int main(int argc, char *argv[])
                 current_level = 1;
                 scoreJeu.score = 0;
                 scoreJeu.vies = 3;
+                sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score, scoreJeu.vies);
+                data.vies = scoreJeu.vies;
                 enSaut = 0;
                 vitesseSaut = 0;
                 touches.gauche = touches.droite = touches.saut = 0;
@@ -880,8 +891,9 @@ int main(int argc, char *argv[])
     // Sauvegarde avant de quitter
     data.niveauActuel = current_level;
     data.scoreActuel = scoreJeu.score;
+    data.vies = scoreJeu.vies;
     if (current_level != 0)
-        sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score);
+        sauvegarderUtilisateur(nomUtilisateur, current_level, scoreJeu.score, scoreJeu.vies);
 
     // Libération des ressources
     free(boutonsNiveauTermine[0].texte);
