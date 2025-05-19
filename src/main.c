@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    TTF_Font *police = TTF_OpenFont("fonts/arial.ttf", 24);
+    TTF_Font *police = TTF_OpenFont("fonts/2P.ttf", 14);
     if (!police)
     {
         printf("Erreur chargement police\n");
