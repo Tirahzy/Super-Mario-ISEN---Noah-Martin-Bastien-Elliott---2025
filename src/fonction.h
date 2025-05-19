@@ -212,6 +212,9 @@ TexturesJeu chargerTextures(SDL_Renderer *renderer);
 void dessinerTexture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y, int w, int h, int cameraX);
 void libererTextures(TexturesJeu textures);
 
+SonsJeu chargerSons();
+void libererSons(SonsJeu sons);
+
 void gererTouches(int *continuer, SDL_Rect *carre, int *enSaut, float *vitesseSaut, Touches *touches, SonsJeu sons);
 int detecterCollision(SDL_Rect joueur);
 
@@ -222,6 +225,7 @@ void dessinerEnnemis(SDL_Renderer *renderer, int cameraX, TexturesJeu textures);
 
 void mettreAJourEnnemis();
 int detecterCollisionEntreEnnemis(SDL_Rect ennemi, int indexEnnemi);
+
 int detecterCollisionEnnemi(SDL_Rect joueur);
 int sauterSurEnnemi(SDL_Rect joueur, float vitesseSaut, ScoreJeu *scoreData);
 
@@ -242,6 +246,14 @@ void ChampignonSiBlocMystereTouche(SDL_Rect joueur, SDL_Rect *champignon, float 
 void afficherScore(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TTF_Font *police);
 void afficherVies(SDL_Renderer *renderer, ScoreJeu *scoreJeu, TexturesJeu textures);
 
+void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
+void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police);
+void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
+
+void afficherTableauScores(SDL_Renderer *renderer, TTF_Font *police);
+
+void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
+
 void initialiserBoutons(Bouton boutons[], int nombreBoutons, char *labels[]);
 void dessinerBoutons(SDL_Renderer *renderer, Bouton boutons[], int nombreBoutons, TTF_Font *police);
 int pointDansRect(int x, int y, SDL_Rect rect);
@@ -252,21 +264,10 @@ int finDeNiveau(SDL_Rect joueur);
 int gererEvenementsNiveauTermine(int *continuer, Bouton boutons[], int nombreBoutons);
 int gererGameOver(int *continuer, Bouton boutons[], int nombreBoutons);
 
-void afficherMonde2(SDL_Renderer *renderer, TTF_Font *police);
-void afficherMonde3(SDL_Renderer *renderer, TTF_Font *police);
-void afficherEcranFin(SDL_Renderer *renderer, TTF_Font *police);
-
-void dessinerFondParallaxe(SDL_Renderer *renderer, SDL_Texture *texture, int cameraX);
-
 int sauvegarderUtilisateur(char nom[], int niveau, int score, int vies);
 int chargerUtilisateur(char nom[], Sauvegarde *out);
 void saisirNomUtilisateur(SDL_Renderer *renderer, TTF_Font *police, char *nom, int maxLen);
 int afficherChoixChargement(SDL_Renderer *renderer, TTF_Font *police, SDL_Window *fenetre);
-
 int chargerToutesLesSauvegardes(Sauvegarde sauvegardes[], int max);
-void afficherTableauScores(SDL_Renderer *renderer, TTF_Font *police);
-
-SonsJeu chargerSons();
-void libererSons(SonsJeu sons);
 
 #endif

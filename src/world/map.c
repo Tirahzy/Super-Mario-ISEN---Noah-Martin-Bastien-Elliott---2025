@@ -1,3 +1,5 @@
+#include "../fonction.h"
+
 // Création des maps
 
 // # bloc
