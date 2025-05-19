@@ -1,4 +1,4 @@
-# Super Mario C - Jeu de plateforme en SDL2
+# Super Mario ISEN - Jeu de plateforme en SDL2
 
 Un jeu de plateforme inspiré de Mario, entièrement développé en **C** avec la bibliothèque **SDL2**.
 
