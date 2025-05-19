@@ -23,7 +23,8 @@ Un jeu de plateforme inspiré de Mario, entièrement développé en **C** avec l
 
 - Q gauche
 - D droite
-- espace sauter
+- Espace sauter
+- Echap quitter / revenir en arrière
 
 - Niveau bonus en pressant "G" dans le choix de niveau 🤫​
 
