@@ -853,6 +853,17 @@ int main(int argc, char *argv[])
             }
             else if (choix == 1)
             {
+                current_level = 1;
+                scoreJeu.score = 0;
+                scoreJeu.vies = 3;
+                enSaut = 0;
+                vitesseSaut = 0;
+                touches.gauche = touches.droite = touches.saut = 0;
+                initialiserMap(current_level);
+                SDL_DestroyTexture(textures.background);
+                textures.background = chargerTextureBMP(renderer, "img/fond.bmp");
+                initialiserCarapaces();
+                initialiserEffets();
                 etatJeu = ETAT_MENU;
             }
 

@@ -1457,7 +1457,7 @@ int sauvegarderUtilisateur(char nom[], int niveauActuel, int score)
                       &sauvegardes[n].niveauActuel,
                       &sauvegardes[n].niveauMax,
                       &sauvegardes[n].scoreActuel,
-                      &sauvegardes[n].scoreMax == 5))
+                      &sauvegardes[n].scoreMax) == 5)
         {
 
             if (strcmp(sauvegardes[n].nom, nom) == 0)
